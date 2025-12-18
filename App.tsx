@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { SLIDES, LESSON_TITLE } from './constants';
 import { SlideType } from './types';
@@ -44,6 +43,7 @@ const App = () => {
 
   const renderSlideContent = () => {
     switch (currentSlide.type) {
+      // BURASI ÖNEMLİ: onNext eklendi
       case SlideType.COVER: return <CoverSlide data={currentSlide} onNext={nextSlide} />;
       case SlideType.OBJECTIVES: return <ObjectivesSlide data={currentSlide} />;
       case SlideType.ICE_BREAKER: return <IceBreakerSlide data={currentSlide} onNext={nextSlide} />;
