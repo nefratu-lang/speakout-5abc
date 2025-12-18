@@ -59,16 +59,18 @@ export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           ) : (
               <img src={data.content.backgroundImage} alt="Cover" className="w-full h-full object-cover opacity-10" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/20"></div>
+          {/* Subtle overlay to help text readability without washing out background */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/10"></div>
        </div>
-       <div className="relative z-10 text-center px-4 animate-in zoom-in duration-1000 w-full max-w-4xl border-y-4 border-blue-900 py-12 bg-white/95 backdrop-blur-md shadow-2xl rounded-xl">
+       {/* More transparent container for "Phase 1" to let background show through clearly */}
+       <div className="relative z-10 text-center px-4 animate-in zoom-in duration-1000 w-full max-w-4xl border-y-4 border-blue-900 py-12 bg-white/40 backdrop-blur-sm shadow-2xl rounded-xl">
           <div className="mb-6 flex justify-center">
-             <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-blue-900 flex items-center justify-center text-5xl md:text-6xl text-blue-900 bg-white shadow-inner">⚓</div>
+             <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-blue-900 flex items-center justify-center text-5xl md:text-6xl text-blue-900 bg-white/90 shadow-inner">⚓</div>
           </div>
-          <h1 className="text-4xl md:text-7xl font-mono font-black text-slate-900 mb-2 tracking-tighter uppercase drop-shadow-sm">{data.title}</h1>
-          <p className="text-sm md:text-xl text-blue-700 font-bold font-mono tracking-[0.3em] uppercase">{data.subtitle}</p>
+          <h1 className="text-4xl md:text-7xl font-mono font-black text-slate-900 mb-2 tracking-tighter uppercase drop-shadow-lg">{data.title}</h1>
+          <p className="text-sm md:text-xl text-blue-800 font-bold font-mono tracking-[0.3em] uppercase drop-shadow-sm">{data.subtitle}</p>
           <div className="mt-12 md:mt-16 animate-pulse">
-            <p className="text-xs md:text-sm text-slate-500 font-mono mb-2">[ TAP TO INITIALIZE ]</p>
+            <p className="text-xs md:text-sm text-slate-700 font-mono mb-2 font-black">[ TAP TO INITIALIZE ]</p>
             <span className="text-2xl text-blue-900 font-bold">▼</span>
           </div>
        </div>
@@ -221,7 +223,17 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
       <div className="flex-1 h-1/2 md:h-full relative bg-slate-200 overflow-hidden group">
-          <img src={data.content.backgroundImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[8s] ease-out" alt="Visual Recon" />
+          {/* Using a key to force image refresh when slide changes */}
+          <img 
+            key={data.content.backgroundImage}
+            src={data.content.backgroundImage} 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[8s] ease-out" 
+            alt="Visual Recon" 
+            onError={(e) => {
+                console.error("Failed to load image:", data.content.backgroundImage);
+                e.currentTarget.style.display = 'none';
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20"></div>
           <div className="absolute bottom-6 right-6 text-white text-[10px] font-mono opacity-50 uppercase tracking-widest">Visual Recon Area // Intel-V5</div>
       </div>
