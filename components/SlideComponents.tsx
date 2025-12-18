@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { SlideData, Vocabulary, VerbChallengeItem, ScrambleItem, DebriefItem } from '../types';
 
@@ -48,9 +47,9 @@ const ReadingParser: React.FC<{ text: string; onVerbFound: () => void }> = ({ te
 };
 
 // --- Cover Slide ---
-export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+export const CoverSlide: React.FC<{ data: SlideData; onNext: () => void }> = ({ data, onNext }) => {
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden bg-white text-slate-900">
+    <div onClick={onNext} className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden bg-white text-slate-900 cursor-pointer">
        <div className="absolute inset-0 z-0">
           {data.content.videoBg ? (
               <video autoPlay loop muted playsInline className="w-full h-full object-cover">
