@@ -57,7 +57,12 @@ export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                   <source src={data.content.videoBg} type="video/mp4" />
               </video>
           ) : (
-              <img src={data.content.backgroundImage} alt="Cover" className="w-full h-full object-cover opacity-10" />
+              <img 
+                src={data.content.backgroundImage} 
+                alt="Cover" 
+                className="w-full h-full object-cover opacity-10"
+                onError={(e) => console.error("Cover Image failed:", data.content.backgroundImage)}
+              />
           )}
           {/* Subtle overlay to help text readability without washing out background */}
           <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/10"></div>
@@ -223,14 +228,15 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
       <div className="flex-1 h-1/2 md:h-full relative bg-slate-200 overflow-hidden group">
-          {/* Using a key to force image refresh when slide changes */}
+          {/* Using a key to force image refresh when slide changes and root-relative pathing */}
           <img 
             key={data.content.backgroundImage}
-            src={data.content.backgroundImage} 
+            src={'/' + data.content.backgroundImage.replace(/^\//, '')} 
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[8s] ease-out" 
             alt="Visual Recon" 
+            onLoad={() => console.log("Loaded:", data.content.backgroundImage)}
             onError={(e) => {
-                console.error("Failed to load image:", data.content.backgroundImage);
+                console.error("Failed to load image:", data.content.backgroundImage, "Requested URL:", e.currentTarget.src);
                 e.currentTarget.style.display = 'none';
             }}
           />
