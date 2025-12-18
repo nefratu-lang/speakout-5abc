@@ -2,23 +2,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { SlideData, Vocabulary, VerbChallengeItem, ScrambleItem, DebriefItem } from '../types';
 
-/**
- * HELPER: Resolves media paths to absolute URLs based on origin.
- * This ensures assets are pulled from the root-level 'media' folder.
- */
-const resolveMediaPath = (path: string): string => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  
-  // Clean path: remove any relative prefixes and assume it starts from 'media/'
-  const cleanPath = path
-    .replace(/^\.\//, '')
-    .replace(/^\//, '')
-    .replace(/^components\//, '');
-    
-  return `${window.location.origin}/${cleanPath}`;
-};
-
 // --- COMPONENT: Hunter Verb ---
 const HunterVerb: React.FC<{ word: string; onFound: () => void }> = ({ word, onFound }) => {
     const [found, setFound] = useState(false);
@@ -52,23 +35,19 @@ const ReadingParser: React.FC<{ text: string; onVerbFound: () => void }> = ({ te
 
 // --- Cover Slide ---
 export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-  const videoUrl = resolveMediaPath(data.content.videoBg);
-  const imageUrl = resolveMediaPath(data.content.backgroundImage);
-
   return (
     <div className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-900 text-white">
        <div className="absolute inset-0 z-0">
           {data.content.videoBg ? (
-              <video key={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover brightness-50">
-                  <source src={videoUrl} type="video/mp4" />
+              <video autoPlay loop muted playsInline className="w-full h-full object-cover brightness-50">
+                  <source src={data.content.videoBg} type="video/mp4" />
               </video>
           ) : (
               <img 
-                key={imageUrl}
-                src={imageUrl} 
+                src={data.content.backgroundImage} 
                 alt="Cover" 
                 className="w-full h-full object-cover opacity-20"
-                onError={(e) => console.error("Cover image error at:", imageUrl)}
+                onError={(e) => console.error("Cover image error:", data.content.backgroundImage)}
               />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/80"></div>
@@ -90,13 +69,12 @@ export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
 
 // --- Objectives Slide ---
 export const ObjectivesSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-  const videoUrl = resolveMediaPath(data.content.videoBg);
   return (
     <div className="h-full w-full relative flex items-center justify-center p-0 overflow-hidden bg-slate-950">
       {data.content.videoBg && (
           <div className="absolute inset-0 z-0 opacity-60">
-             <video key={videoUrl} autoPlay loop muted playsInline className="w-full h-full object-cover brightness-50 contrast-125">
-                <source src={videoUrl} type="video/mp4" />
+             <video autoPlay loop muted playsInline className="w-full h-full object-cover brightness-50 contrast-125">
+                <source src={data.content.videoBg} type="video/mp4" />
              </video>
              <div className="absolute inset-0 bg-gradient-to-br from-blue-950/95 via-blue-950/60 to-transparent"></div>
           </div>
@@ -140,7 +118,6 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   const isComplete = foundCount === totalVerbs && totalVerbs > 0;
   useEffect(() => { setFoundCount(0); setActiveVocab(null); }, [data.id]);
   const paragraphs = data.content.text.split(/\n\s*\n/);
-  const imageUrl = resolveMediaPath(data.content.backgroundImage);
 
   return (
     <div key={data.id} className="h-full w-full flex flex-col md:flex-row bg-white overflow-hidden">
@@ -186,13 +163,11 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
       </div>
       <div className="flex-1 h-1/2 md:h-full relative bg-slate-950 overflow-hidden group">
           <img 
-            key={imageUrl}
-            src={imageUrl} 
+            src={data.content.backgroundImage} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[8s]" 
             alt="Visual Recon" 
-            onLoad={() => console.log("Success: Image found at", imageUrl)}
             onError={(e) => {
-                console.error("Critical: Image missing at", imageUrl);
+                console.error("Image missing at", data.content.backgroundImage);
                 e.currentTarget.style.display = 'none';
             }}
           />
