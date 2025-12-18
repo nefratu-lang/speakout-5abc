@@ -44,7 +44,7 @@ const App = () => {
 
   const renderSlideContent = () => {
     switch (currentSlide.type) {
-      case SlideType.COVER: return <CoverSlide data={currentSlide} />;
+      case SlideType.COVER: return <CoverSlide data={currentSlide} onNext={nextSlide} />;
       case SlideType.OBJECTIVES: return <ObjectivesSlide data={currentSlide} />;
       case SlideType.ICE_BREAKER: return <IceBreakerSlide data={currentSlide} onNext={nextSlide} />;
       case SlideType.READING: return <ReadingSlide data={currentSlide} />;
