@@ -1,4 +1,4 @@
-// --- Reading Slide (Garantili Sığdırma Modu) ---
+// --- Reading Slide (Garantili Sığdırma Modu - object-contain) ---
 export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
   const [foundCount, setFoundCount] = useState(0);
@@ -65,22 +65,20 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
       
-      {/* SAĞ TARAF: GÖRSEL ALANI (SIĞDIRMA MODU) */}
+      {/* SAĞ TARAF: GÖRSEL ALANI (Güncellendi) */}
       <div 
         className="flex-1 h-1/2 md:h-full bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden group cursor-zoom-in"
         onClick={() => setIsZoomed(true)}
       >
-          {/* Arka plan deseni */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 to-slate-950 pointer-events-none"></div>
 
-          {/* RESİM: object-contain ile sığdırma. */}
+          {/* Sığdırma işlemi burada yapılıyor: object-contain */}
           <img 
             src={data.content.backgroundImage} 
             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-2xl" 
             alt="Visual Intel" 
           />
 
-          {/* Büyüteç */}
           <div className="absolute top-4 right-4 text-white/40 group-hover:text-white transition-colors z-20 bg-black/20 p-2 rounded-full backdrop-blur-sm pointer-events-none">
              <span className="text-2xl">🔍</span>
           </div>
