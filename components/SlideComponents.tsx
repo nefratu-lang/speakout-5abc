@@ -593,7 +593,7 @@ export const DailyReportSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     );
 };
 
-// --- Reading Challenge Slide (Namik Ekin Oynatıcısı Dahil Edildi) ---
+// --- Reading Challenge Slide ---
 export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [inputs, setInputs] = useState<Record<number, string>>({});
     const [submitted, setSubmitted] = useState(false);
@@ -616,7 +616,6 @@ export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) =
             <div className="w-full bg-slate-900 border-b border-white/10 p-6 sticky top-0 z-20 flex justify-between items-center shadow-2xl">
                 <h2 className="text-3xl font-black font-mono text-red-600 uppercase tracking-widest animate-pulse">{data.title}</h2>
                 <div className="flex items-center gap-4">
-                    {/* AUDIO PLAYER INTERFACE */}
                     <div className="flex items-center bg-slate-800 rounded-full px-4 py-2 border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                         <audio 
                             ref={audioRef} 
@@ -669,6 +668,7 @@ export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) =
     );
 };
 
+// --- Legend Dossier Slide (GÜNCELLENDİ: Hata Kontrolü Eklendi) ---
 export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [selections, setSelections] = useState<Record<number, string>>({});
     const [results, setResults] = useState<Record<number, boolean>>({});
@@ -688,41 +688,47 @@ export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
-                    {data.content.folders.map((folder: any) => (
-                        <div key={folder.id} className={`p-8 rounded-[2rem] border-4 transition-all ${results[folder.id] === true ? 'bg-green-950/20 border-green-600 shadow-[0_0_30px_rgba(22,163,74,0.3)]' : results[folder.id] === false ? 'bg-red-950/20 border-red-600' : 'bg-slate-900 border-slate-800'}`}>
-                            <div className="flex justify-between items-center mb-6">
-                                <span className="font-mono text-xs font-black text-slate-500 tracking-[0.3em] uppercase">{folder.label}</span>
-                                {results[folder.id] === true && <span className="text-green-500 font-black font-mono text-xs animate-pulse">✓ VERIFIED</span>}
-                                {results[folder.id] === false && <span className="text-red-500 font-black font-mono text-xs">⚠ ACCESS DENIED</span>}
+                    {data.content.folders.map((folder: any) => {
+                        const isAnswered = results[folder.id] !== undefined;
+                        const isCorrect = results[folder.id] === true;
+                        
+                        return (
+                            <div key={folder.id} className={`p-8 rounded-[2rem] border-4 transition-all ${isAnswered ? (isCorrect ? 'bg-green-950/20 border-green-600 shadow-[0_0_30px_rgba(22,163,74,0.3)]' : 'bg-red-950/20 border-red-600 animate-shake') : 'bg-slate-900 border-slate-800'}`}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <span className="font-mono text-xs font-black text-slate-500 tracking-[0.3em] uppercase">{folder.label}</span>
+                                    {isAnswered && (isCorrect ? <span className="text-green-500 font-black font-mono text-xs animate-pulse">✓ VERIFIED</span> : <span className="text-red-500 font-black font-mono text-xs">⚠ ERROR: {folder.correct}</span>)}
+                                </div>
+                                <p className="text-xl md:text-2xl font-serif leading-relaxed mb-8 italic">
+                                    {folder.text.split('______').map((part: string, i: number) => (
+                                        <React.Fragment key={i}>
+                                            {part}
+                                            {i === 0 && <span className={`underline decoration-wavy px-2 font-black ${isAnswered ? (isCorrect ? 'text-green-400' : 'text-red-500 line-through') : 'text-amber-500'}`}>{selections[folder.id] || "______"}</span>}
+                                            {i === 0 && isAnswered && !isCorrect && <span className="text-green-400 font-black ml-1 animate-in zoom-in">[{folder.correct}]</span>}
+                                        </React.Fragment>
+                                    ))}
+                                </p>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {folder.keys.map((key: string) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => handleSelect(folder.id, key, folder.correct)}
+                                            disabled={isAnswered}
+                                            className={`py-3 rounded-xl font-mono font-black text-sm transition-all ${
+                                                isAnswered
+                                                ? (key === folder.correct ? 'bg-green-600 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : (selections[folder.id] === key ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20'))
+                                                : 'bg-slate-800 hover:bg-slate-700 active:scale-95'
+                                            }`}
+                                        >
+                                            {key}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <p className="text-xl md:text-2xl font-serif leading-relaxed mb-8 italic">
-                                {folder.text.split('______').map((part: string, i: number) => (
-                                    <React.Fragment key={i}>
-                                        {part}
-                                        {i === 0 && <span className={`underline decoration-wavy px-2 font-black ${results[folder.id] === true ? 'text-green-400' : results[folder.id] === false ? 'text-red-500' : 'text-amber-500'}`}>{selections[folder.id] || "______"}</span>}
-                                    </React.Fragment>
-                                ))}
-                            </p>
-                            <div className="grid grid-cols-3 gap-3">
-                                {folder.keys.map((key: string) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => handleSelect(folder.id, key, folder.correct)}
-                                        disabled={results[folder.id] !== undefined}
-                                        className={`py-3 rounded-xl font-mono font-black text-sm transition-all ${
-                                            selections[folder.id] === key 
-                                            ? (results[folder.id] ? 'bg-green-600' : 'bg-red-600') 
-                                            : 'bg-slate-800 hover:bg-slate-700 active:scale-95'
-                                        }`}
-                                    >
-                                        {key}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
+            <style>{`@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } } .animate-shake { animation: shake 0.4s ease-in-out; }`}</style>
         </div>
     );
 };
@@ -754,7 +760,7 @@ export const DebriefSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   );
 };
 
-// --- STUBS (Keep them for now but empty implementation) ---
+// --- STUBS ---
 export const ChecklistSlide: React.FC<{ data: SlideData }> = () => null;
 export const MediaSlide: React.FC<{ data: SlideData }> = () => null;
 export const ComprehensionTFSlide: React.FC<{ data: SlideData }> = () => null;
