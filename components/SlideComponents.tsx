@@ -154,7 +154,7 @@ export const IceBreakerSlide: React.FC<{ data: SlideData; onNext?: () => void }>
     );
 };
 
-// --- Reading Slide (Updated with Completion Feedback) ---
+// --- Reading Slide ---
 export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
   const [foundCount, setFoundCount] = useState(0);
@@ -226,7 +226,7 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   );
 };
 
-// --- Scramble (Improved Scrolling & Layout) ---
+// --- Scramble ---
 export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [shuffledItems, setShuffledItems] = useState<ScrambleItem[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -252,13 +252,11 @@ export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     return (
         <div className="h-full w-full bg-[#1a1a1a] flex flex-col items-center justify-center p-4 overflow-hidden relative">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-leather.png')] opacity-30"></div>
-            
             <div className="relative z-10 w-full max-w-7xl h-full flex flex-col overflow-hidden">
                 <div className="text-center py-4 shrink-0">
                     <div className="inline-block bg-amber-600 text-slate-950 px-4 py-1 rounded-full text-xs font-mono font-black uppercase mb-2 shadow-xl animate-pulse tracking-widest">SITREP: Data Scramble Error</div>
                     <h3 className="text-3xl md:text-5xl font-black text-amber-500 uppercase tracking-tighter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] leading-none">{data.title}</h3>
                 </div>
-
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch p-2 overflow-hidden">
                     <div className="bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2rem] border-4 border-slate-800 flex flex-col overflow-hidden">
                         <div className="bg-slate-900/80 p-2 mb-4 rounded-lg text-slate-500 font-mono text-[10px] uppercase tracking-widest shrink-0">Scattered Log Fragments:</div>
@@ -267,17 +265,7 @@ export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                                 const isUsed = selectedIds.includes(item.id);
                                 const rotation = ((item.id * 13) % 10) - 5; 
                                 return (
-                                    <button 
-                                        key={item.id} 
-                                        onClick={() => handleSelect(item.id)}
-                                        disabled={isUsed}
-                                        className={`w-full p-4 rounded-xl text-left font-serif transition-all transform shadow-lg relative ${
-                                            isUsed 
-                                            ? 'opacity-0 scale-50 grayscale pointer-events-none translate-x-full absolute' 
-                                            : 'bg-[#fffcf0] border-l-[10px] border-amber-600 text-slate-800 hover:-translate-y-1 hover:shadow-amber-500/20 group active:scale-95'
-                                        }`}
-                                        style={{ transform: `rotate(${isUsed ? 0 : rotation}deg)` }}
-                                    >
+                                    <button key={item.id} onClick={() => handleSelect(item.id)} disabled={isUsed} className={`w-full p-4 rounded-xl text-left font-serif transition-all transform shadow-lg relative ${isUsed ? 'opacity-0 scale-50 grayscale pointer-events-none translate-x-full absolute' : 'bg-[#fffcf0] border-l-[10px] border-amber-600 text-slate-800 hover:-translate-y-1 hover:shadow-amber-500/20 group active:scale-95'}`} style={{ transform: `rotate(${isUsed ? 0 : rotation}deg)` }}>
                                         <div className="text-[9px] text-amber-700 font-mono font-black mb-1 opacity-60 uppercase tracking-widest border-b border-amber-900/10 pb-1">Archive ID: #{item.id.toString().padStart(3, '0')}</div>
                                         <div className="text-base md:text-xl font-black leading-tight">{item.parts.join(' ')}</div>
                                     </button>
@@ -285,7 +273,6 @@ export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                             })}
                         </div>
                     </div>
-
                     <div className="bg-slate-950/90 p-8 rounded-[2rem] border-4 border-slate-900 flex flex-col shadow-inner overflow-hidden">
                         <div className="mb-4 flex justify-between items-end border-b-2 border-slate-800 pb-2 shrink-0">
                             <p className="text-amber-500 font-mono text-[10px] uppercase tracking-widest font-black">Timeline Recovery Status:</p>
@@ -295,25 +282,15 @@ export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                             {Array.from({ length: data.content.items.length }).map((_, i) => {
                                 const filledItem = data.content.items.find((item: any) => item.id === selectedIds[i]);
                                 return (
-                                    <div key={i} className={`min-h-[60px] md:min-h-[70px] rounded-xl border flex items-center px-6 transition-all duration-500 group ${
-                                        filledItem 
-                                        ? 'bg-green-950/20 border-green-500 text-green-100 shadow-[0_0_20px_rgba(34,197,94,0.1)]' 
-                                        : 'bg-slate-900/30 border-slate-800 border-dashed text-slate-600'
-                                    }`}>
+                                    <div key={i} className={`min-h-[60px] md:min-h-[70px] rounded-xl border flex items-center px-6 transition-all duration-500 group ${filledItem ? 'bg-green-950/20 border-green-500 text-green-100 shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-slate-900/30 border-slate-800 border-dashed text-slate-600'}`}>
                                         <span className={`text-[10px] font-mono font-black mr-4 transition-colors ${filledItem ? 'text-green-500' : 'opacity-20'}`}>STEP 0{i+1}</span>
-                                        <span className={`text-base md:text-xl font-serif italic ${filledItem ? 'opacity-100' : 'opacity-30'}`}>
-                                            {filledItem ? filledItem.parts.join(' ') : '— ACCESSING INTEL —'}
-                                        </span>
+                                        <span className={`text-base md:text-xl font-serif italic ${filledItem ? 'opacity-100' : 'opacity-30'}`}>{filledItem ? filledItem.parts.join(' ') : '— ACCESSING INTEL —'}</span>
                                         {filledItem && <span className="ml-auto text-green-500 text-xl animate-in zoom-in">✓</span>}
                                     </div>
                                 );
                             })}
                         </div>
-                        {complete && (
-                            <div className="mt-4 bg-green-600 text-white font-mono font-black text-center py-4 rounded-xl shadow-[0_0_50px_rgba(22,163,74,0.4)] animate-in slide-in-from-bottom-8 text-xl tracking-[0.4em] uppercase shrink-0">
-                                CHRONOLOGY VERIFIED
-                            </div>
-                        )}
+                        {complete && <div className="mt-4 bg-green-600 text-white font-mono font-black text-center py-4 rounded-xl shadow-[0_0_50px_rgba(22,163,74,0.4)] animate-in slide-in-from-bottom-8 text-xl tracking-[0.4em] uppercase shrink-0">CHRONOLOGY VERIFIED</div>}
                     </div>
                 </div>
             </div>
@@ -324,16 +301,13 @@ export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
 // --- Verb Challenge ---
 export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set());
-
     const toggleReveal = (idx: number) => {
         setRevealedIds(prev => {
             const next = new Set(prev);
-            if (next.has(idx)) next.delete(idx);
-            else next.add(idx);
+            if (next.has(idx)) next.delete(idx); else next.add(idx);
             return next;
         });
     };
-
     const getRule = (item: VerbChallengeItem) => {
         const base = item.base.toUpperCase();
         const past = item.past.toUpperCase();
@@ -342,7 +316,6 @@ export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
         if (base === 'SWAP') return `${base} (+P) + ED`;
         return `${base} + ED`;
     };
-
     return (
         <div className="h-full flex flex-col items-center p-2 bg-slate-900 overflow-y-auto pt-4 pb-12 custom-scrollbar">
             <div className="max-w-7xl w-full flex flex-col gap-6">
@@ -351,16 +324,11 @@ export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                     <h2 className="text-3xl md:text-5xl font-mono font-black text-white uppercase tracking-tighter drop-shadow-sm">{data.title}</h2>
                     <p className="text-blue-500 font-mono font-black tracking-[0.3em] uppercase mt-2 text-xs md:text-sm">Click cards to decode Past Simple data</p>
                 </div>
-                
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {data.content.verbs.map((item: VerbChallengeItem, idx: number) => {
                         const isRevealed = revealedIds.has(idx);
                         return (
-                            <button 
-                                key={idx} 
-                                onClick={() => toggleReveal(idx)}
-                                className={`h-32 md:h-40 perspective-1000 group relative transition-all duration-700 w-full active:scale-95`}
-                            >
+                            <button key={idx} onClick={() => toggleReveal(idx)} className={`h-32 md:h-40 perspective-1000 group relative transition-all duration-700 w-full active:scale-95`}>
                                 <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${isRevealed ? 'rotate-y-180 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''}`}>
                                     <div className={`absolute inset-0 backface-hidden flex flex-col items-center justify-center p-4 bg-slate-800 border-2 border-slate-700 rounded-2xl shadow-xl`}>
                                         <div className="text-[9px] text-slate-500 font-mono uppercase mb-2 tracking-widest">Base Proto</div>
@@ -378,97 +346,49 @@ export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                     })}
                 </div>
             </div>
-            <style>{`
-                .perspective-1000 { perspective: 1000px; }
-                .preserve-3d { transform-style: preserve-3d; }
-                .backface-hidden { backface-visibility: hidden; }
-                .rotate-y-180 { transform: rotateY(180deg); }
-            `}</style>
+            <style>{`.perspective-1000 { perspective: 1000px; } .preserve-3d { transform-style: preserve-3d; } .backface-hidden { backface-visibility: hidden; } .rotate-y-180 { transform: rotateY(180deg); }`}</style>
         </div>
     );
 };
 
-// --- Grammar Recap (Full Sentence Engine) ---
+// --- Grammar Recap ---
 export const GrammarRecapSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     return (
         <div className="h-full flex flex-col items-center p-4 bg-slate-100 overflow-y-auto pt-10 pb-20 custom-scrollbar">
              <div className="max-w-6xl w-full">
-                <div className="text-center mb-10">
-                    <h2 className="text-5xl font-black font-mono text-slate-900 uppercase tracking-tighter">{data.title}</h2>
-                    <p className="text-blue-700 font-mono font-black mt-2 tracking-[0.4em] uppercase">{data.subtitle}</p>
-                </div>
-
+                <div className="text-center mb-10"><h2 className="text-5xl font-black font-mono text-slate-900 uppercase tracking-tighter">{data.title}</h2><p className="text-blue-700 font-mono font-black mt-2 tracking-[0.4em] uppercase">{data.subtitle}</p></div>
                 <div className="bg-white border-4 border-blue-700 rounded-3xl p-8 shadow-2xl mb-12 transform hover:scale-[1.01] transition-all">
                     <h3 className="font-black text-blue-900 text-xl mb-6 flex items-center gap-4 uppercase tracking-tighter"><span className="w-5 h-5 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,1)]"></span> THE FULL SENTENCE ENGINE</h3>
                     <div className="bg-slate-950 p-8 rounded-2xl font-mono text-center text-xl md:text-3xl text-white border-b-8 border-blue-900 shadow-inner flex flex-wrap justify-center items-center gap-3">
-                        <span className="bg-blue-600 px-3 py-1 rounded">SUBJECT</span>
-                        <span>+</span>
-                        <span className="bg-green-600 px-3 py-1 rounded">VERB+ed</span>
-                        <span>+</span>
-                        <span className="bg-amber-600 px-3 py-1 rounded">OBJECT</span>
-                        <span>+</span>
-                        <span className="bg-purple-600 px-3 py-1 rounded">PLACE</span>
-                        <span>+</span>
-                        <span className="bg-red-600 px-3 py-1 rounded">TIME</span>
+                        <span className="bg-blue-600 px-3 py-1 rounded">SUBJECT</span><span>+</span><span className="bg-green-600 px-3 py-1 rounded">VERB+ed</span><span>+</span><span className="bg-amber-600 px-3 py-1 rounded">OBJECT</span><span>+</span><span className="bg-purple-600 px-3 py-1 rounded">PLACE</span><span>+</span><span className="bg-red-600 px-3 py-1 rounded">TIME</span>
                     </div>
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 font-serif text-lg md:text-2xl italic text-slate-700 p-4">
                         <p className="border-l-4 border-blue-200 pl-4">"I <span className="text-green-600 font-black">cleaned</span> the deck at the port <span className="text-red-600 font-black">yesterday</span>."</p>
                         <p className="border-l-4 border-blue-200 pl-4">"He <span className="text-green-600 font-black">passed</span> the test in Yalova <span className="text-red-600 font-black">two days ago</span>."</p>
                     </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                     <div className="bg-slate-900 text-white rounded-3xl p-10 shadow-xl border-t-8 border-red-500">
                         <h3 className="font-black text-red-500 text-2xl mb-6 uppercase tracking-tighter">TIME ADVERBS (TACTICAL TIME)</h3>
-                        <div className="grid grid-cols-2 gap-4 font-mono text-base md:text-xl">
-                            <div className="flex items-center gap-2">🚩 Yesterday</div>
-                            <div className="flex items-center gap-2">🚩 Two days ago</div>
-                            <div className="flex items-center gap-2">🚩 Last night</div>
-                            <div className="flex items-center gap-2">🚩 Last week</div>
-                            <div className="flex items-center gap-2">🚩 Last month</div>
-                            <div className="flex items-center gap-2">🚩 In 2023</div>
-                        </div>
+                        <div className="grid grid-cols-2 gap-4 font-mono text-base md:text-xl"><div>🚩 Yesterday</div><div>🚩 Two days ago</div><div>🚩 Last night</div><div>🚩 Last week</div><div>🚩 Last month</div><div>🚩 In 2023</div></div>
                     </div>
-
                     <div className="bg-white border-4 border-slate-200 rounded-3xl p-10 shadow-xl hover:border-red-500 transition-all">
                         <h3 className="font-black text-slate-900 text-2xl mb-6 flex items-center gap-4 uppercase tracking-tighter"><span className="w-4 h-4 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,1)]"></span> NEGATIVE OPS</h3>
-                        <div className="bg-slate-50 p-6 rounded-2xl mb-6 font-mono text-center text-2xl text-red-900 border-2 border-slate-100 shadow-inner uppercase">
-                           SUBJECT + <span className="text-red-700 font-black">didn't</span> + BASE VERB
-                        </div>
-                        <ul className="space-y-3 text-slate-700 text-lg font-serif leading-relaxed italic">
-                            <li>✅ I <span className="text-red-700 font-black underline">didn't clean</span> the dorm last night.</li>
-                            <li>✅ He <span className="text-red-700 font-black underline">didn't study</span> for exams yesterday.</li>
-                        </ul>
+                        <div className="bg-slate-50 p-6 rounded-2xl mb-6 font-mono text-center text-2xl text-red-900 border-2 border-slate-100 shadow-inner uppercase">SUBJECT + <span className="text-red-700 font-black">didn't</span> + BASE VERB</div>
+                        <ul className="space-y-3 text-slate-700 text-lg font-serif leading-relaxed italic"><li>✅ I <span className="text-red-700 font-black underline">didn't clean</span> the dorm last night.</li><li>✅ He <span className="text-red-700 font-black underline">didn't study</span> for exams yesterday.</li></ul>
                     </div>
-
                     <div className="bg-white border-4 border-slate-200 rounded-3xl p-10 shadow-xl md:col-span-2 hover:border-amber-500 transition-all">
                         <h3 className="font-black text-slate-900 text-2xl mb-6 uppercase tracking-tighter flex items-center gap-4"><span className="w-4 h-4 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,1)]"></span> WH- INTERROGATION</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {data.content.whExamples?.map((item: any, idx: number) => (
-                                <div key={idx} className="font-serif text-xl text-slate-800 p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-sm">
-                                    ➡ {item.question} 
-                                    <span className="text-xs text-slate-400 font-mono block uppercase mt-2 font-black tracking-widest border-t pt-2 border-slate-200">Context: {item.context}</span>
-                                </div>
-                            ))}
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{data.content.whExamples?.map((item: any, idx: number) => (<div key={idx} className="font-serif text-xl text-slate-800 p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-sm">➡ {item.question} <span className="text-xs text-slate-400 font-mono block uppercase mt-2 font-black tracking-widest border-t pt-2 border-slate-200">Context: {item.context}</span></div>))}</div>
                     </div>
                 </div>
-
-                <div className="bg-amber-100 border-l-[12px] border-amber-600 p-8 rounded-2xl shadow-lg">
-                    <div className="flex items-center gap-4 mb-4">
-                        <span className="text-3xl text-amber-700">⚠️</span>
-                        <h4 className="text-amber-900 font-mono font-black text-xl md:text-2xl uppercase tracking-tighter">ALERT: IRREGULAR PROTOCOLS</h4>
-                    </div>
-                    <p className="text-amber-800 text-lg md:text-xl font-serif leading-relaxed">
-                        Attention recruits! Irregular verbs ignore the **-ed** rule. For example: <span className="font-bold">go → went</span>. Focus on the regular **-ed** pattern for this mission.
-                    </p>
-                </div>
+                <div className="bg-amber-100 border-l-[12px] border-amber-600 p-8 rounded-2xl shadow-lg"><div className="flex items-center gap-4 mb-4"><span className="text-3xl text-amber-700">⚠️</span><h4 className="text-amber-900 font-mono font-black text-xl md:text-2xl uppercase tracking-tighter">ALERT: IRREGULAR PROTOCOLS</h4></div><p className="text-amber-800 text-lg md:text-xl font-serif leading-relaxed">Attention recruits! Irregular verbs ignore the **-ed** rule. For example: <span className="font-bold">go → went</span>. Focus on the regular **-ed** pattern for this mission.</p></div>
              </div>
         </div>
     );
 };
 
-// --- Tactical Drill (3x5 Grid Layout) ---
+// --- Tactical Drill ---
 export const TacticalDrillSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [selections, setSelections] = useState<Record<number, string>>({});
     const [results, setResults] = useState<Record<number, boolean | null>>({});
@@ -482,50 +402,17 @@ export const TacticalDrillSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     return (
         <div className="h-full flex flex-col items-center p-4 bg-slate-900 text-white overflow-y-auto pt-6 pb-20 custom-scrollbar">
              <div className="max-w-7xl w-full space-y-6">
-                <div className="text-center border-b border-slate-800 pb-4 shrink-0">
-                    <h2 className="text-3xl md:text-5xl font-black font-mono text-blue-400 uppercase tracking-tighter animate-pulse">{data.title}</h2>
-                    <p className="text-slate-500 font-mono mt-2 tracking-widest uppercase text-[10px]">RECOVERY GRID: SELECT CORRECT TRANSMISSIONS</p>
-                </div>
-                
+                <div className="text-center border-b border-slate-800 pb-4 shrink-0"><h2 className="text-3xl md:text-5xl font-black font-mono text-blue-400 uppercase tracking-tighter animate-pulse">{data.title}</h2><p className="text-slate-500 font-mono mt-2 tracking-widest uppercase text-[10px]">RECOVERY GRID: SELECT CORRECT TRANSMISSIONS</p></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {data.content.scenarios.map((scenario: any) => (
                         <div key={scenario.id} className={`p-5 rounded-xl border-2 transition-all shadow-xl flex flex-col justify-between ${results[scenario.id] === true ? 'bg-green-950/40 border-green-500' : results[scenario.id] === false ? 'bg-red-950/40 border-red-500 animate-shake' : 'bg-slate-950/30 border-slate-800 hover:border-blue-600'}`}>
                             <div>
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[9px] font-mono text-slate-400 uppercase bg-slate-950 px-2 py-1 rounded border border-white/5">SEQ-{scenario.id} // {scenario.category}</span>
-                                </div>
-                                
-                                <div className="bg-blue-900/20 border-l-2 border-blue-500 p-3 mb-4 rounded shadow-inner">
-                                    <span className="text-[9px] font-mono text-blue-400 block uppercase font-black tracking-widest mb-1">Signal Context:</span>
-                                    <span className="text-sm font-mono text-slate-200 italic leading-tight block">"{scenario.context}"</span>
-                                </div>
-
-                                <p className="text-base md:text-lg font-serif mb-4 leading-tight min-h-[3.5rem]">
-                                    {scenario.question.split('_______').map((part: string, i: number) => (
-                                        <React.Fragment key={i}>
-                                            {part}
-                                            {i === 0 && <span className={`inline-block border-b-2 min-w-[60px] text-center font-black px-1 transition-all ${results[scenario.id] === true ? 'text-green-400 border-green-400' : results[scenario.id] === false ? 'text-red-500 border-red-500 line-through' : 'text-blue-400 border-blue-500 animate-pulse'}`}>{selections[scenario.id] || "_______"}</span>}
-                                        </React.Fragment>
-                                    ))}
-                                    {results[scenario.id] === false && <span className="text-green-400 font-black ml-2 animate-in zoom-in text-xs bg-green-900/40 px-2 py-0.5 rounded">[{scenario.correct}]</span>}
-                                </p>
+                                <div className="flex justify-between items-start mb-2"><span className="text-[9px] font-mono text-slate-400 uppercase bg-slate-950 px-2 py-1 rounded border border-white/5">SEQ-{scenario.id} // {scenario.category}</span></div>
+                                <div className="bg-blue-900/20 border-l-2 border-blue-500 p-3 mb-4 rounded shadow-inner"><span className="text-[9px] font-mono text-blue-400 block uppercase font-black tracking-widest mb-1">Signal Context:</span><span className="text-sm font-mono text-slate-200 italic leading-tight block">"{scenario.context}"</span></div>
+                                <p className="text-base md:text-lg font-serif mb-4 leading-tight min-h-[3.5rem]">{scenario.question.split('_______').map((part: string, i: number) => (<React.Fragment key={i}>{part}{i === 0 && <span className={`inline-block border-b-2 min-w-[60px] text-center font-black px-1 transition-all ${results[scenario.id] === true ? 'text-green-400 border-green-400' : results[scenario.id] === false ? 'text-red-500 border-red-500 line-through' : 'text-blue-400 border-blue-500 animate-pulse'}`}>{selections[scenario.id] || "_______"}</span>}</React.Fragment>))}{results[scenario.id] === false && <span className="text-green-400 font-black ml-2 animate-in zoom-in text-xs bg-green-900/40 px-2 py-0.5 rounded">[{scenario.correct}]</span>}</p>
                             </div>
-                            
                             <div className="flex gap-2">
-                                {scenario.options.map((opt: string) => (
-                                    <button 
-                                        key={opt} 
-                                        onClick={() => handleSelect(scenario.id, opt)} 
-                                        disabled={results[scenario.id] !== undefined} 
-                                        className={`flex-1 py-2 rounded text-xs font-mono font-black transition-all shadow-lg ${
-                                            results[scenario.id] !== undefined 
-                                            ? (scenario.correct === opt ? 'bg-green-600' : (selections[scenario.id] === opt ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20')) 
-                                            : 'bg-blue-700 hover:bg-blue-600 active:scale-95'
-                                        }`}
-                                    >
-                                        {opt}
-                                    </button>
-                                ))}
+                                {scenario.options.map((opt: string) => (<button key={opt} onClick={() => handleSelect(scenario.id, opt)} disabled={results[scenario.id] !== undefined} className={`flex-1 py-2 rounded text-xs font-mono font-black transition-all shadow-lg ${results[scenario.id] !== undefined ? (scenario.correct === opt ? 'bg-green-600' : (selections[scenario.id] === opt ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20')) : 'bg-blue-700 hover:bg-blue-600 active:scale-95'}`}>{opt}</button>))}
                             </div>
                         </div>
                     ))}
@@ -562,6 +449,7 @@ export const ClassroomGameSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     );
 };
 
+// --- Grammar Analysis ---
 export const GrammarAnalysisSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     return (
         <div className="h-full w-full bg-slate-50 p-6 md:p-12 overflow-y-auto custom-scrollbar">
@@ -580,6 +468,7 @@ export const GrammarAnalysisSlide: React.FC<{ data: SlideData }> = ({ data }) =>
     );
 };
 
+// --- Daily Report ---
 export const DailyReportSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [inputs, setInputs] = useState<Record<number, string>>({});
     const [submitted, setSubmitted] = useState(false);
@@ -599,45 +488,13 @@ export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) =
     const [submitted, setSubmitted] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
-
-    const toggleAudio = () => {
-        if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play();
-            }
-            setIsPlaying(!isPlaying);
-        }
-    };
-
+    const toggleAudio = () => { if (audioRef.current) { if (isPlaying) audioRef.current.pause(); else audioRef.current.play(); setIsPlaying(!isPlaying); } };
     return (
         <div className="h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto custom-scrollbar">
             <div className="w-full bg-slate-900 border-b border-white/10 p-6 sticky top-0 z-20 flex justify-between items-center shadow-2xl">
                 <h2 className="text-3xl font-black font-mono text-red-600 uppercase tracking-widest animate-pulse">{data.title}</h2>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center bg-slate-800 rounded-full px-4 py-2 border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-                        <audio 
-                            ref={audioRef} 
-                            src="/media/namik.mp3" 
-                            onEnded={() => setIsPlaying(false)}
-                        />
-                        <button 
-                            onClick={toggleAudio}
-                            className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded-full transition-all active:scale-90"
-                        >
-                            {isPlaying ? (
-                                <span className="text-xl">||</span>
-                            ) : (
-                                <span className="text-xl ml-1">▶</span>
-                            )}
-                        </button>
-                        <div className="ml-3 hidden md:block">
-                            <p className="text-[9px] font-mono font-black text-blue-400 uppercase tracking-tighter">Audio Intelligence</p>
-                            <p className="text-[10px] font-mono text-white leading-none uppercase">namik_chronicles.mp3</p>
-                        </div>
-                    </div>
-                    
+                    <div className="flex items-center bg-slate-800 rounded-full px-4 py-2 border border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]"><audio ref={audioRef} src="/media/namik.mp3" onEnded={() => setIsPlaying(false)} /><button onClick={toggleAudio} className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded-full transition-all active:scale-90">{isPlaying ? <span className="text-xl">||</span> : <span className="text-xl ml-1">▶</span>}</button><div className="ml-3 hidden md:block"><p className="text-[9px] font-mono font-black text-blue-400 uppercase tracking-tighter">Audio Intelligence</p><p className="text-[10px] font-mono text-white leading-none uppercase">namik_chronicles.mp3</p></div></div>
                     <button onClick={() => setSubmitted(true)} className="bg-red-700 text-white font-black font-mono py-3 px-8 rounded-xl shadow-lg hover:bg-red-600 transition-all uppercase tracking-widest border-2 border-red-500">DECODE INTEL</button>
                 </div>
             </div>
@@ -648,17 +505,7 @@ export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) =
                     {data.content.parts[0].textSegments.map((seg: string, i: number) => (
                         <React.Fragment key={i}>
                             {seg}{data.content.parts[0].gaps.find((g: any) => g.id === i + 1) && (
-                                <span className="relative group inline-block mx-2">
-                                    <input 
-                                        type="text" 
-                                        value={inputs[i+1] || ""} 
-                                        onChange={(e) => setInputs({...inputs, [i+1]: e.target.value})} 
-                                        className={`w-48 bg-slate-950 border-b-4 text-center py-1 outline-none font-mono text-2xl transition-all font-black ${submitted ? (inputs[i+1]?.toLowerCase().trim() === data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() ? 'text-green-500 border-green-500 bg-green-900/20' : 'text-red-500 border-red-600 bg-red-900/20') : 'border-white/20 focus:border-blue-500'}`} 
-                                    />
-                                    {submitted && inputs[i+1]?.toLowerCase().trim() !== data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() && (
-                                        <span className="absolute -bottom-10 left-0 text-xs text-red-500 font-mono font-black uppercase bg-slate-950 px-3 py-1.5 rounded-xl border border-red-900 shadow-2xl z-20 whitespace-nowrap">{data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer}</span>
-                                    )}
-                                </span>
+                                <span className="relative group inline-block mx-2"><input type="text" value={inputs[i+1] || ""} onChange={(e) => setInputs({...inputs, [i+1]: e.target.value})} className={`w-48 bg-slate-950 border-b-4 text-center py-1 outline-none font-mono text-2xl transition-all font-black ${submitted ? (inputs[i+1]?.toLowerCase().trim() === data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() ? 'text-green-500 border-green-500 bg-green-900/20' : 'text-red-500 border-red-600 bg-red-900/20') : 'border-white/20 focus:border-blue-500'}`} />{submitted && inputs[i+1]?.toLowerCase().trim() !== data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() && (<span className="absolute -bottom-10 left-0 text-xs text-red-500 font-mono font-black uppercase bg-slate-950 px-3 py-1.5 rounded-xl border border-red-900 shadow-2xl z-20 whitespace-nowrap">{data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer}</span>)}</span>
                             )}
                         </React.Fragment>
                     ))}
@@ -668,10 +515,19 @@ export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) =
     );
 };
 
-// --- Legend Dossier Slide (GÜNCELLENDİ: Hata Kontrolü Eklendi) ---
+// --- Legend Dossier Slide (GÜNCELLENDİ: Şıklar Artık Karıştırılıyor!) ---
 export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     const [selections, setSelections] = useState<Record<number, string>>({});
     const [results, setResults] = useState<Record<number, boolean>>({});
+
+    // Her soru için şıkları karıştırıp hafızada tutuyoruz (sayfa her render olduğunda değişmesin diye)
+    const shuffledKeysMap = useMemo(() => {
+        const map: Record<number, string[]> = {};
+        data.content.folders.forEach((folder: any) => {
+            map[folder.id] = [...folder.keys].sort(() => Math.random() - 0.5);
+        });
+        return map;
+    }, [data.id]);
 
     const handleSelect = (folderId: number, key: string, correct: string) => {
         if (results[folderId] !== undefined) return;
@@ -686,17 +542,17 @@ export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                     <h2 className="text-4xl md:text-6xl font-black font-mono text-amber-500 uppercase tracking-tighter">{data.title}</h2>
                     <p className="text-slate-500 font-mono mt-2 uppercase tracking-widest">{data.content.instruction}</p>
                 </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
                     {data.content.folders.map((folder: any) => {
                         const isAnswered = results[folder.id] !== undefined;
                         const isCorrect = results[folder.id] === true;
+                        const currentKeys = shuffledKeysMap[folder.id];
                         
                         return (
                             <div key={folder.id} className={`p-8 rounded-[2rem] border-4 transition-all ${isAnswered ? (isCorrect ? 'bg-green-950/20 border-green-600 shadow-[0_0_30px_rgba(22,163,74,0.3)]' : 'bg-red-950/20 border-red-600 animate-shake') : 'bg-slate-900 border-slate-800'}`}>
                                 <div className="flex justify-between items-center mb-6">
                                     <span className="font-mono text-xs font-black text-slate-500 tracking-[0.3em] uppercase">{folder.label}</span>
-                                    {isAnswered && (isCorrect ? <span className="text-green-500 font-black font-mono text-xs animate-pulse">✓ VERIFIED</span> : <span className="text-red-500 font-black font-mono text-xs">⚠ ERROR: {folder.correct}</span>)}
+                                    {isAnswered && (isCorrect ? <span className="text-green-500 font-black font-mono text-xs animate-pulse">✓ VERIFIED</span> : <span className="text-red-500 font-black font-mono text-xs">⚠ ERROR: CORRECT WAS {folder.correct}</span>)}
                                 </div>
                                 <p className="text-xl md:text-2xl font-serif leading-relaxed mb-8 italic">
                                     {folder.text.split('______').map((part: string, i: number) => (
@@ -708,17 +564,8 @@ export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
                                     ))}
                                 </p>
                                 <div className="grid grid-cols-3 gap-3">
-                                    {folder.keys.map((key: string) => (
-                                        <button
-                                            key={key}
-                                            onClick={() => handleSelect(folder.id, key, folder.correct)}
-                                            disabled={isAnswered}
-                                            className={`py-3 rounded-xl font-mono font-black text-sm transition-all ${
-                                                isAnswered
-                                                ? (key === folder.correct ? 'bg-green-600 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : (selections[folder.id] === key ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20'))
-                                                : 'bg-slate-800 hover:bg-slate-700 active:scale-95'
-                                            }`}
-                                        >
+                                    {currentKeys.map((key: string) => (
+                                        <button key={key} onClick={() => handleSelect(folder.id, key, folder.correct)} disabled={isAnswered} className={`py-3 rounded-xl font-mono font-black text-sm transition-all ${isAnswered ? (key === folder.correct ? 'bg-green-600 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : (selections[folder.id] === key ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20')) : 'bg-slate-800 hover:bg-slate-700 active:scale-95'}`}>
                                             {key}
                                         </button>
                                     ))}
@@ -733,25 +580,18 @@ export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     );
 };
 
+// --- Debrief Slide ---
 export const DebriefSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   return (
     <div className="h-full w-full bg-slate-900 flex items-center justify-center p-6 text-white overflow-hidden relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-amber-900/20"></div>
         <div className="max-w-4xl w-full relative z-10 bg-slate-950/80 backdrop-blur-3xl p-10 md:p-20 rounded-[4rem] border-8 border-slate-900 shadow-[0_50px_100px_rgba(0,0,0,0.8)]">
-            <div className="text-center mb-16">
-                <div className="inline-block bg-green-600 text-white px-6 py-2 rounded-full font-mono font-black text-sm uppercase tracking-[0.5em] mb-6 shadow-[0_0_30px_rgba(22,163,74,0.6)] animate-bounce">Mission Complete</div>
-                <h2 className="text-5xl md:text-8xl font-black font-mono uppercase tracking-tighter drop-shadow-2xl">{data.title}</h2>
-                <p className="text-slate-500 font-mono mt-4 uppercase tracking-widest text-lg font-bold">{data.subtitle}</p>
-            </div>
-            
+            <div className="text-center mb-16"><div className="inline-block bg-green-600 text-white px-6 py-2 rounded-full font-mono font-black text-sm uppercase tracking-[0.5em] mb-6 shadow-[0_0_30px_rgba(22,163,74,0.6)] animate-bounce">Mission Complete</div><h2 className="text-5xl md:text-8xl font-black font-mono uppercase tracking-tighter drop-shadow-2xl">{data.title}</h2><p className="text-slate-500 font-mono mt-4 uppercase tracking-widest text-lg font-bold">{data.subtitle}</p></div>
             <div className="space-y-6">
                 {data.content.checklist.map((item: any, idx: number) => (
                     <div key={idx} className="bg-slate-900/50 p-6 rounded-2xl border-2 border-slate-800 flex justify-between items-center group hover:border-green-600 transition-all">
                         <span className="text-xl md:text-3xl font-mono font-black text-slate-300 group-hover:text-white">{item.text}</span>
-                        <div className="flex items-center gap-4">
-                            <span className="text-green-500 font-mono font-black text-sm tracking-widest">{item.reflection}</span>
-                            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(22,163,74,0.5)]">✓</div>
-                        </div>
+                        <div className="flex items-center gap-4"><span className="text-green-500 font-mono font-black text-sm tracking-widest">{item.reflection}</span><div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(22,163,74,0.5)]">✓</div></div>
                     </div>
                 ))}
             </div>
