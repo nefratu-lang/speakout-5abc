@@ -1,16 +1,19 @@
 import { SlideType, SlideData } from './types';
 
-// --- BURASI DEĞİŞTİ: String yerine Import yapıyoruz ---
-import imgDecision from './components/media/reading1.jpg';
-import imgArrival from './components/media/reading2.jpg';
-import imgTraining from './components/media/reading3.jpg';
-import imgOath from './components/media/reading4.jpg';
-// Videoyu da import ediyoruz
-import videoGemiler from './components/media/gemiler.mp4'; 
+// İMPORTLARI SİL! (Bunlara gerek kalmadı)
+// import imgDecision from ...  <-- SİL
+
+// Yolları "/media/..." şeklinde "String" olarak yaz.
+// Başına "/" koymak "public klasöründen al" demektir.
+
+const imgDecision = '/media/reading1.jpg';
+const imgArrival = '/media/reading2.jpg';
+const imgTraining = '/media/reading3.jpg';
+const imgOath = '/media/reading4.jpg';
 
 export const LESSON_TITLE = "UNIT 5: FROM CANDIDATE TO SAILOR";
 
-// ... (TEXT_SCENE değişkenleri aynı kalabilir) ...
+// ... (Metinler aynı kalsın) ...
 
 export const SLIDES: SlideData[] = [
   { 
@@ -19,46 +22,9 @@ export const SLIDES: SlideData[] = [
     title: "PHASE 1: THE DECISION", 
     subtitle: "Preparation & Exams", 
     content: { 
-      backgroundImage: imgDecision, // Artık import edilen değişkeni kullanıyoruz
-      videoBg: videoGemiler         // Videoyu da değişkenden alıyoruz
+      backgroundImage: imgDecision, 
+      videoBg: '/media/gemiler.mp4' // Videoyu da böyle yapıştır
     } 
   },
-  // ...
-  { 
-    id: 2, 
-    type: SlideType.READING, 
-    // ...
-    content: { 
-      backgroundImage: imgDecision, // String değil değişken
-      // ...
-    } 
-  },
-  { 
-    id: 3, 
-    type: SlideType.READING, 
-    // ...
-    content: { 
-      backgroundImage: imgArrival, // Değişken
-      // ...
-    } 
-  },
-  { 
-    id: 4, 
-    type: SlideType.READING, 
-    // ...
-    content: { 
-      backgroundImage: imgTraining, // Değişken
-      // ...
-    } 
-  },
-  { 
-    id: 5, 
-    type: SlideType.READING, 
-    // ...
-    content: { 
-      backgroundImage: imgOath, // Değişken
-      // ...
-    } 
-  },
-  // ... diğerleri aynı kalabilir
+  // ... diğerleri zaten yukarıdaki değişkenleri kullanıyor, sorun yok.
 ];
