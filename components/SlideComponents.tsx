@@ -1,4 +1,4 @@
-// --- Reading Slide (Absolute Fit Fix) ---
+// --- Reading Slide (Flexbox Center & Max-Size Fix) ---
 export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
   const [foundCount, setFoundCount] = useState(0);
@@ -65,19 +65,23 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
       
-      {/* SAĞ TARAF: GÖRSEL ALANI (Güncellendi) */}
+      {/* SAĞ TARAF: GÖRSEL ALANI (GARANTİ ÇÖZÜM) */}
       <div 
-        className="flex-1 h-1/2 md:h-full relative bg-slate-900 overflow-hidden cursor-pointer group"
+        className="flex-1 h-1/2 md:h-full relative bg-slate-900 flex items-center justify-center p-4 overflow-hidden cursor-pointer group"
         onClick={() => setIsZoomed(true)}
       >
           {/* Arkaplan Deseni */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 to-slate-950"></div>
           
-          {/* RESİM: Absolute Positioning ile Sabitleme */}
-          {/* 'inset-0' resmi köşelere yapıştırır. 'p-8' içeri doğru 32px boşluk bırakır (Padding) */}
+          {/* RESİM: 
+              - max-w-full: Genişlik kutudan büyük olamaz
+              - max-h-full: Yükseklik kutudan büyük olamaz
+              - w-auto h-auto: Oranını koru
+              - object-contain: Sığdır
+          */}
           <img 
             src={data.content.backgroundImage} 
-            className="absolute inset-0 w-full h-full object-contain p-4 md:p-8 z-10 transition-transform duration-500 group-hover:scale-105" 
+            className="max-w-full max-h-full w-auto h-auto object-contain shadow-2xl rounded-sm z-10 transition-transform duration-500 group-hover:scale-[1.02]" 
             alt="Visual Intel" 
           />
           
@@ -94,16 +98,16 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
       {/* LIGHTBOX (Tam Ekran) */}
       {isZoomed && (
         <div 
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-10 backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-8 backdrop-blur-md animate-in fade-in duration-200"
             onClick={(e) => {
                 e.stopPropagation();
                 setIsZoomed(false);
             }}
         >
-            {/* Modal içindeki resim de sınırlı boyutta */}
+            {/* Modal içindeki resim */}
             <img 
                 src={data.content.backgroundImage} 
-                className="w-auto h-auto max-w-full max-h-full object-contain rounded shadow-2xl border border-slate-800" 
+                className="max-w-full max-h-full w-auto h-auto object-contain rounded shadow-2xl border border-slate-800" 
                 alt="Full Screen Intel" 
             />
             <button className="absolute top-6 right-6 text-white/50 hover:text-white text-4xl transition-colors">&times;</button>
