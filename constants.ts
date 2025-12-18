@@ -2,7 +2,7 @@
 import { SlideType, SlideData } from './types';
 
 // Thematic Images for Visual Recon Area
-// Using root-relative paths to ensure Vercel serves them correctly from the root directory
+// Using pure relative paths for better resolution across different environments
 const imgDecision = 'components/media/reading1.jpg';
 const imgArrival = 'components/media/reading2.jpg';
 const imgTraining = 'components/media/reading3.jpg';
