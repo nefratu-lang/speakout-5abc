@@ -1,4 +1,4 @@
-// --- Reading Slide (Tam Görünüm Fix) ---
+// --- Reading Slide (Absolute Fit Fix) ---
 export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
   const [foundCount, setFoundCount] = useState(0);
@@ -20,7 +20,7 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   
   return (
     <div key={data.id} className="h-full w-full flex flex-col md:flex-row bg-white overflow-hidden animate-in fade-in duration-500">
-      {/* SOL TARAF: METİN ALANI */}
+      {/* SOL TARAF: METİN (Aynı) */}
       <div className="flex-1 flex flex-col relative h-1/2 md:h-full overflow-y-auto border-r border-slate-200 custom-scrollbar z-10 bg-white">
           <div className="p-4 border-b border-slate-200 bg-slate-50 sticky top-0 z-20 flex justify-between items-center px-6 shadow-sm">
              <div>
@@ -65,18 +65,19 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
       
-      {/* SAĞ TARAF: GÖRSEL ALANI (FIXED) */}
+      {/* SAĞ TARAF: GÖRSEL ALANI (Güncellendi) */}
       <div 
-        className="flex-1 h-1/2 md:h-full relative bg-slate-900 flex items-center justify-center overflow-hidden p-6 cursor-pointer group"
+        className="flex-1 h-1/2 md:h-full relative bg-slate-900 overflow-hidden cursor-pointer group"
         onClick={() => setIsZoomed(true)}
       >
-          {/* Arkaplan Deseni (Estetik için) */}
+          {/* Arkaplan Deseni */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 to-slate-950"></div>
           
-          {/* GÖRSEL: object-contain ile sığdırma */}
+          {/* RESİM: Absolute Positioning ile Sabitleme */}
+          {/* 'inset-0' resmi köşelere yapıştırır. 'p-8' içeri doğru 32px boşluk bırakır (Padding) */}
           <img 
             src={data.content.backgroundImage} 
-            className="max-w-full max-h-full object-contain shadow-2xl rounded-sm z-10 transition-transform duration-500 group-hover:scale-[1.02]" 
+            className="absolute inset-0 w-full h-full object-contain p-4 md:p-8 z-10 transition-transform duration-500 group-hover:scale-105" 
             alt="Visual Intel" 
           />
           
@@ -90,18 +91,19 @@ export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
           </div>
       </div>
 
-      {/* LIGHTBOX (Tam Ekran Modu) */}
+      {/* LIGHTBOX (Tam Ekran) */}
       {isZoomed && (
         <div 
-            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200"
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-10 backdrop-blur-md animate-in fade-in duration-200"
             onClick={(e) => {
                 e.stopPropagation();
                 setIsZoomed(false);
             }}
         >
+            {/* Modal içindeki resim de sınırlı boyutta */}
             <img 
                 src={data.content.backgroundImage} 
-                className="max-w-full max-h-full object-contain rounded shadow-2xl" 
+                className="w-auto h-auto max-w-full max-h-full object-contain rounded shadow-2xl border border-slate-800" 
                 alt="Full Screen Intel" 
             />
             <button className="absolute top-6 right-6 text-white/50 hover:text-white text-4xl transition-colors">&times;</button>
