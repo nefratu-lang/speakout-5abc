@@ -8,6 +8,7 @@ export enum SlideType {
   COMPREHENSION_MC = 'COMPREHENSION_MC',
   GRAMMAR = 'GRAMMAR',
   GRAMMAR_BANK = 'GRAMMAR_BANK',
+  GRAMMAR_ANALYSIS = 'GRAMMAR_ANALYSIS',
   DRILL = 'DRILL',
   SPEAKING = 'SPEAKING',
   MEDIA = 'MEDIA',
@@ -18,7 +19,14 @@ export enum SlideType {
   DEBRIEF = 'DEBRIEF',
   IMPERATIVES = 'IMPERATIVES',
   MISSION_LOG = 'MISSION_LOG',
-  VERB_CHALLENGE = 'VERB_CHALLENGE' // New Massive Drill Type
+  VERB_CHALLENGE = 'VERB_CHALLENGE',
+  DAILY_REPORT = 'DAILY_REPORT',
+  READING_CHALLENGE = 'READING_CHALLENGE',
+  RADAR_SCAN = 'RADAR_SCAN',
+  LEGEND_DOSSIER = 'LEGEND_DOSSIER', // New Interactive Activity
+  GRAMMAR_RECAP = 'GRAMMAR_RECAP',
+  TACTICAL_DRILL = 'TACTICAL_DRILL',
+  CLASSROOM_GAME = 'CLASSROOM_GAME'
 }
 
 export interface Vocabulary {
@@ -32,16 +40,6 @@ export interface KeyPoint {
   position: 'left' | 'right';
 }
 
-export interface ReadingContent {
-  text: string;
-  vocabulary: Vocabulary[];
-  keyPoints?: KeyPoint[];
-  audioSrc?: string; 
-  backgroundImage?: string;
-  backgroundVideo?: string; 
-  footerImage?: string; 
-}
-
 export interface SlideData {
   id: number;
   type: SlideType;
@@ -50,74 +48,9 @@ export interface SlideData {
   content: any; 
 }
 
-export interface QuestionTF {
-  id: number;
-  statement: string;
-  isTrue: boolean;
-  explanation: string;
-  contextHighlight?: string; 
-}
-
-export interface QuestionMC {
-  id: number;
-  question: string;
-  options: string[];
-  correctIndex: number;
-  explanation: string;
-  iconType: 'history' | 'geography' | 'person' | 'general' | 'military';
-  contextHighlight?: string; 
-}
-
-export interface GrammarItem {
-  id: number;
-  prefix: string;
-  suffix: string;
-  correctAnswer: string; 
-}
-
-export interface DrillItem {
-  id: number;
-  speaker?: string;
-  text: string;
-}
-
-export interface GrammarBankItem {
-  id: number;
-  segments: string[]; 
-  answers: string[]; 
-}
-
-export interface GrammarBankSection {
-  id: number;
-  title: string;
-  instruction: string;
-  items: GrammarBankItem[];
-}
-
-export interface MatchingPair {
-  id: number;
-  left: string;
-  right: string;
-  contextHighlight?: string; 
-}
-
-export interface ChecklistItem {
-  id: string;
-  text: string;
-  isCorrect: boolean; 
-  contextHighlight?: string; 
-}
-
-export interface QAItem {
-  id: number;
-  question: string;
-  answer: string;
-  contextHighlight?: string; 
-}
-
 export interface ScrambleItem {
   id: number;
-  parts: string[]; // ["You", "should", "go"]
+  parts: string[]; 
   correctSentence: string;
 }
 
@@ -126,33 +59,10 @@ export interface DebriefItem {
   reflection: string;
 }
 
-export interface ImperativeSign {
-  icon: string;
-  rule: string;
-  correct: boolean;
-}
-
-export interface GrammarQuizItem {
-  id: number;
-  question: string; // "_____ open your books"
-  options: string[]; // ["Please", "Do"]
-  correctIndex: number;
-}
-
-// New Interface for Verb Challenge
 export interface VerbChallengeItem {
   base: string;
   past: string;
   type: 'regular' | 'irregular';
-}
-
-export interface MissionLogStep {
-  id: number;
-  phase: string;
-  command: string;
-  subCommand?: string;
-  visualIcon: string; // Emoji or simple graphic rep
-  style: 'normal' | 'alert' | 'action';
 }
 
 export interface ChatMessage {

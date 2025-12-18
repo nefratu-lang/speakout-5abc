@@ -1,175 +1,120 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { SlideData, QuestionTF, QuestionMC, GrammarItem, Vocabulary, KeyPoint, DrillItem, GrammarBankSection, GrammarBankItem, MatchingPair, ChecklistItem, QAItem, ScrambleItem, DebriefItem, ImperativeSign, MissionLogStep, GrammarQuizItem, VerbChallengeItem } from '../types';
 
-// --- HELPER: Text Reference Modal (DARK MODE ENHANCED) ---
-interface HighlightData {
-    id: number | string;
-    text: string;
-    colorClass: string;
-}
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { SlideData, Vocabulary, VerbChallengeItem, ScrambleItem, DebriefItem } from '../types';
 
-// Updated colors for dark mode visibility (brighter/neon)
-const HIGHLIGHT_COLORS = [
-    'bg-yellow-900/50 border-yellow-500 text-yellow-200',
-    'bg-green-900/50 border-green-500 text-green-200',
-    'bg-blue-900/50 border-blue-500 text-blue-200',
-    'bg-pink-900/50 border-pink-500 text-pink-200',
-];
+// --- COMPONENT: Hunter Verb (Refined: No Bolding, Perfect Blend) ---
+const HunterVerb: React.FC<{ word: string; onFound: () => void }> = ({ word, onFound }) => {
+    const [found, setFound] = useState(false);
+    
+    // Reset local found state when component re-mounts (on slide change)
+    useEffect(() => {
+        setFound(false);
+    }, [word]);
 
-const TextReferenceModal: React.FC<{ text?: string; highlights?: HighlightData[] }> = ({ text, highlights = [] }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    if (!text) return null;
-
-    const renderHighlightedText = () => {
-        if (!highlights || highlights.length === 0) return text;
-
-        let parts: { text: string; highlight?: HighlightData }[] = [{ text }];
-
-        highlights.forEach(h => {
-            if (!h.text || h.text.trim() === "") return;
-            const safeText = h.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const pattern = new RegExp(`(${safeText})`, 'g');
-            
-            const newParts: typeof parts = [];
-            parts.forEach(p => {
-                if (p.highlight) {
-                    newParts.push(p);
-                } else {
-                    const split = p.text.split(pattern);
-                    split.forEach(s => {
-                        if (s === h.text) {
-                            newParts.push({ text: s, highlight: h });
-                        } else {
-                            newParts.push({ text: s });
-                        }
-                    });
-                }
-            });
-            parts = newParts;
-        });
-
-        return parts.map((part, i) => {
-            if (part.highlight) {
-                return (
-                    <span key={i} className={`${part.highlight.colorClass} font-mono px-1 mx-0.5 rounded border border-dashed`}>
-                        <sup className="text-[0.6em] font-bold mr-1 bg-black/30 px-1 rounded">REF-{part.highlight.id}</sup>
-                        {part.text}
-                    </span>
-                );
-            }
-            return <span key={i}>{part.text}</span>;
-        });
+    const handleClick = () => {
+        if (!found) {
+            setFound(true);
+            onFound();
+        }
     };
-
     return (
-        <>
-            <button 
-                onClick={() => setIsOpen(true)}
-                className="absolute top-2 right-2 md:top-4 md:right-4 z-30 bg-ocean-100 hover:bg-ocean-200 text-gold-400 font-mono text-xs md:text-sm border border-gold-500/50 px-3 py-2 rounded shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center gap-2 transition-all active:scale-95"
-            >
-                <span className="animate-pulse">📂</span>
-                <span className="hidden md:inline">OPEN INTEL</span>
-                <span className="md:hidden">INTEL</span>
-            </button>
-
-            {isOpen && (
-                <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-200">
-                    <div className="bg-ocean-100 w-full max-w-4xl max-h-full rounded border border-ocean-300 shadow-[0_0_50px_rgba(59,130,246,0.1)] flex flex-col relative">
-                        <div className="bg-ocean-50/50 border-b border-ocean-200 p-3 md:p-4 flex justify-between items-center shrink-0">
-                             <div className="flex flex-col">
-                                <h3 className="font-mono font-bold text-lg md:text-xl text-gold-400 tracking-widest uppercase">CLASSIFIED INTEL</h3>
-                                <p className="text-ocean-400 text-[10px] md:text-xs">EYES ONLY</p>
-                             </div>
-                             <button onClick={() => setIsOpen(false)} className="text-ocean-400 hover:text-white font-mono text-xl px-2">[CLOSE]</button>
-                        </div>
-                        
-                        <div className="p-4 md:p-8 overflow-y-auto custom-scrollbar font-serif text-base md:text-xl leading-relaxed text-slate-300 whitespace-pre-wrap">
-                            {renderHighlightedText()}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        <span 
+            onClick={handleClick}
+            className={`cursor-pointer transition-all duration-300 px-0.5 rounded-sm inline-block ${
+                found 
+                ? "bg-green-600 text-white font-black shadow-[0_0_12px_rgba(22,163,74,0.6)] scale-110" 
+                : "text-slate-800 font-normal border-b-2 border-transparent hover:border-slate-300"
+            }`}
+        >
+            {word}
+        </span>
     );
 };
 
+// --- HELPER: Reading Text Parser ---
+const ReadingParser: React.FC<{ text: string; onVerbFound: () => void }> = ({ text, onVerbFound }) => {
+    if (!text) return null;
+    const parts = text.split('**');
+    return (
+        <span className="leading-relaxed">
+            {parts.map((part, index) => {
+                if (index % 2 === 1) {
+                    return <HunterVerb key={index} word={part} onFound={onVerbFound} />;
+                }
+                return <span key={index} className="font-normal">{part}</span>;
+            })}
+        </span>
+    );
+};
 
 // --- Cover Slide ---
 export const CoverSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden bg-black text-white">
+    <div className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden bg-white text-slate-900">
        <div className="absolute inset-0 z-0">
-          <img src={data.content.backgroundImage} alt="Cover" className="w-full h-full object-cover opacity-30 grayscale contrast-125" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black"></div>
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30"></div>
+          {data.content.videoBg ? (
+              <video autoPlay loop muted playsInline className="w-full h-full object-cover">
+                  <source src={data.content.videoBg} type="video/mp4" />
+              </video>
+          ) : (
+              <img src={data.content.backgroundImage} alt="Cover" className="w-full h-full object-cover opacity-10" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/20"></div>
        </div>
-
-       <div className="relative z-10 text-center px-4 animate-in zoom-in duration-1000 w-full max-w-4xl border-y-2 border-gold-500/30 py-10 bg-black/40 backdrop-blur-sm">
-          <div className="mb-4 flex justify-center">
-             <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border-2 border-gold-500 flex items-center justify-center text-4xl md:text-5xl shadow-[0_0_30px_rgba(234,179,8,0.4)] bg-black">⚓</div>
+       <div className="relative z-10 text-center px-4 animate-in zoom-in duration-1000 w-full max-w-4xl border-y-4 border-blue-900 py-12 bg-white/95 backdrop-blur-md shadow-2xl rounded-xl">
+          <div className="mb-6 flex justify-center">
+             <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-blue-900 flex items-center justify-center text-5xl md:text-6xl text-blue-900 bg-white shadow-inner">⚓</div>
           </div>
-          <h1 className="text-4xl md:text-7xl font-mono font-bold text-slate-100 mb-2 tracking-tighter uppercase drop-shadow-2xl">{data.title}</h1>
-          <p className="text-sm md:text-xl text-gold-400 font-mono tracking-[0.3em] uppercase">{data.subtitle}</p>
-          
+          <h1 className="text-4xl md:text-7xl font-mono font-black text-slate-900 mb-2 tracking-tighter uppercase drop-shadow-sm">{data.title}</h1>
+          <p className="text-sm md:text-xl text-blue-700 font-bold font-mono tracking-[0.3em] uppercase">{data.subtitle}</p>
           <div className="mt-12 md:mt-16 animate-pulse">
-            <p className="text-xs md:text-sm text-ocean-400 font-mono mb-2">[ TAP TO INITIALIZE ]</p>
-            <span className="text-2xl text-gold-500">▼</span>
+            <p className="text-xs md:text-sm text-slate-500 font-mono mb-2">[ TAP TO INITIALIZE ]</p>
+            <span className="text-2xl text-blue-900 font-bold">▼</span>
           </div>
        </div>
     </div>
   );
 };
 
-// --- Objectives Slide (TACTICAL LIST) ---
+// --- Objectives / Lesson Plan Slide ---
 export const ObjectivesSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   return (
-    <div className="h-full w-full flex flex-col items-center p-4 md:p-8 overflow-y-auto bg-slate-900 text-slate-200">
-      <div className="max-w-6xl w-full flex flex-col gap-4 md:gap-6 pb-20">
-        
-        <div className="border-b border-ocean-300 pb-4 mb-2">
-           <h2 className="text-2xl md:text-4xl font-mono font-bold text-white mb-1">{data.title}</h2>
-           <p className="text-ocean-400 font-mono text-xs md:text-sm uppercase tracking-widest">/// {data.subtitle} ///</p>
+    <div className="h-full w-full relative flex items-center justify-center p-0 overflow-hidden bg-slate-950">
+      {data.content.videoBg && (
+          <div className="absolute inset-0 z-0 opacity-60">
+             <video autoPlay loop muted playsInline className="w-full h-full object-cover brightness-50 contrast-125">
+                <source src={data.content.videoBg} type="video/mp4" />
+             </video>
+             <div className="absolute inset-0 bg-gradient-to-br from-blue-950/95 via-blue-950/60 to-transparent"></div>
+          </div>
+      )}
+      
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center max-w-7xl px-6 md:px-12 py-10">
+        <div className="w-full text-center mb-8 md:mb-14">
+            <span className="bg-amber-500 text-slate-950 px-5 py-1.5 text-xs md:text-sm font-mono font-black uppercase tracking-[0.5em] rounded-full shadow-2xl">Classroom Briefing</span>
+            <h2 className="text-5xl md:text-9xl font-mono font-black text-white mt-4 tracking-tighter uppercase drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">{data.title}</h2>
+            <div className="h-2 w-48 bg-amber-500 mx-auto mt-6 rounded-full shadow-[0_0_30px_rgba(245,158,11,0.8)]"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            {/* Main Objectives */}
-            <div className="bg-ocean-100/50 border border-ocean-300 p-6 rounded-sm shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-2 text-ocean-300 opacity-20 text-6xl font-black">01</div>
-                <h3 className="text-gold-400 font-mono font-bold mb-4 flex items-center gap-2"><span className="w-2 h-2 bg-gold-400 rounded-full"></span> PRIMARY TARGETS</h3>
-                <ul className="space-y-3 font-mono text-sm md:text-base">
-                    {data.content.objectives.map((obj: string, i: number) => (
-                        <li key={i} className="flex items-start gap-3 border-l-2 border-ocean-300 pl-3">
-                            <span className="text-blue-400 font-bold">></span>
-                            {obj}
-                        </li>
-                    ))}
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            <div className="bg-white/10 backdrop-blur-2xl p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20">
+                <h3 className="text-amber-400 font-mono font-black text-xl mb-6 uppercase flex items-center gap-3"><span className="w-4 h-4 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(245,158,11,1)]"></span> MISSION TARGETS</h3>
+                <ul className="space-y-5 font-mono text-sm md:text-lg text-slate-100">
+                    {data.content.objectives?.map((obj: string, i: number) => <li key={i} className="flex items-start gap-4 leading-tight"><span className="text-amber-500 font-black">0{i+1}</span><span>{obj}</span></li>)}
                 </ul>
             </div>
-
-            {/* Grammar Focus */}
-            <div className="bg-ocean-100/30 border border-ocean-300 p-6 rounded-sm">
-                <h3 className="text-blue-400 font-mono font-bold mb-4">SYSTEM MECHANICS (GRAMMAR)</h3>
-                <div className="flex flex-col gap-2">
-                    {data.content.grammar.map((g: string, i: number) => (
-                        <div key={i} className="bg-black/30 px-3 py-2 border-l-4 border-blue-500 text-slate-300 font-mono text-xs md:text-sm">{g}</div>
-                    ))}
+            <div className="bg-slate-900/90 backdrop-blur-2xl p-8 md:p-10 rounded-3xl shadow-2xl border border-amber-500/30">
+                <h3 className="text-amber-500 font-mono font-black text-xl mb-6 uppercase tracking-widest">TACTICAL PROTOCOLS</h3>
+                <div className="flex flex-col gap-5">
+                    {data.content.grammar?.map((g: string, i: number) => <div key={i} className="bg-slate-950/80 px-6 py-5 border-l-8 border-amber-600 text-slate-100 font-mono text-xs md:text-base rounded-r-2xl shadow-inner border border-white/5"><span className="text-amber-500 font-black block text-[10px] mb-1">STRAT-0{i+1}</span> {g}</div>)}
                 </div>
             </div>
-
-             {/* Vocabulary */}
-             <div className="md:col-span-2 bg-black/40 border border-ocean-300 p-6 rounded-sm">
-                <h3 className="text-green-400 font-mono font-bold mb-4">DATA PACKETS (VOCABULARY)</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                     {data.content.vocabulary.map((v: string, i: number) => (
-                        <span key={i} className="bg-ocean-100 px-2 py-1 text-slate-300 text-xs font-mono border border-ocean-200/50 truncate hover:text-white hover:border-gold-500 transition-colors">{v}</span>
-                    ))}
-                </div>
-            </div>
-            
-            {/* Importance */}
-            <div className="md:col-span-2 bg-gold-900/10 border border-gold-600/30 p-4 text-center">
-                 <p className="text-gold-200 font-serif italic text-sm md:text-lg">"{data.content.importance}"</p>
+            <div className="bg-white/10 backdrop-blur-2xl p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20 lg:col-span-1 md:col-span-2">
+                <h3 className="text-blue-400 font-mono font-black text-xl mb-6 uppercase flex items-center gap-3"><span className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(59,130,246,1)]"></span> SUCCESS CRITERIA</h3>
+                <ul className="space-y-5 font-mono text-sm md:text-lg text-slate-200">
+                    {data.content.expectedOutcomes?.map((out: string, i: number) => <li key={i} className="flex items-center gap-4 italic"><span className="text-blue-400 font-bold">➤</span><span>{out}</span></li>)}
+                </ul>
+                <div className="mt-12 pt-8 border-t border-white/10 text-center"><p className="text-xs text-slate-500 font-mono uppercase tracking-[0.3em] animate-pulse">Awaiting commander signal...</p></div>
             </div>
         </div>
       </div>
@@ -177,316 +122,461 @@ export const ObjectivesSlide: React.FC<{ data: SlideData }> = ({ data }) => {
   );
 };
 
-// --- Ice Breaker (RADAR / SCANNER THEME) ---
-export const IceBreakerSlide: React.FC<{ data: SlideData; onNext?: () => void }> = ({ data, onNext }) => {
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const content = data.content;
+// --- Ice Breaker Slide ---
+export const IceBreakerSlide: React.FC<{ data: SlideData; onNext?: () => void }> = ({ data }) => {
+    return (
+        <div className="h-full w-full bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600 rounded-full blur-[150px] animate-pulse"></div>
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-600 rounded-full blur-[150px] animate-pulse delay-700"></div>
+            </div>
+            <div className="relative z-10 max-w-5xl w-full bg-white rounded-[3rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.5)] flex flex-col md:flex-row border-[12px] border-slate-900">
+                <div className="bg-slate-900 p-12 text-center flex flex-col justify-center items-center md:w-2/5 border-r-8 border-slate-800">
+                    <div className="text-[10rem] mb-6 drop-shadow-2xl animate-bounce">🧊</div>
+                    <h2 className="text-amber-500 font-mono font-black text-3xl uppercase tracking-widest border-y-4 border-amber-500/30 py-4 w-full">ICE BREAKER</h2>
+                    <p className="text-slate-500 font-mono text-[10px] uppercase mt-6 tracking-[0.5em] font-black">Commence Discussion</p>
+                </div>
+                <div className="p-12 md:p-20 md:w-3/5 flex flex-col justify-center bg-slate-50">
+                    <div className="mb-10 flex items-center gap-4">
+                        <span className="w-12 h-1 bg-amber-500 rounded-full"></span>
+                        <span className="text-slate-400 font-mono font-black text-sm uppercase tracking-widest">Operational Inquiry</span>
+                    </div>
+                    <h3 className="text-4xl md:text-6xl font-serif font-black text-slate-900 mb-12 leading-[1.15] tracking-tight italic">
+                        "{data.content.question || "How did you prepare for your MSÜ exams?"}"
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                        <div className="text-slate-500 font-mono text-xs uppercase font-black tracking-widest flex items-center gap-3">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> 
+                            Awaiting verbal response from class...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
+// --- Reading Slide (Updated with Completion Feedback) ---
+export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+  const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
+  const [foundCount, setFoundCount] = useState(0);
+  
+  const totalVerbs = useMemo(() => {
+    return (data.content.text.match(/\*\*/g) || []).length / 2;
+  }, [data.content.text]);
+
+  const isComplete = foundCount === totalVerbs && totalVerbs > 0;
+
+  // Reset logic when slide changes
   useEffect(() => {
-    setSelectedOption(null);
+    setFoundCount(0);
+    setActiveVocab(null);
   }, [data.id]);
 
+  const paragraphs = data.content.text.split(/\n\s*\n/);
+  
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center p-4 relative bg-black text-white overflow-y-auto">
-      {/* Radar Background */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200vw] h-[200vw] border border-green-500/10 rounded-full"></div>
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] border border-green-500/10 rounded-full"></div>
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100vw] h-[100vw] border border-green-500/10 rounded-full"></div>
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,20,0,0.8),black)]"></div>
-      </div>
-
-      <div className="relative z-10 w-full max-w-4xl flex flex-col bg-ocean-100/80 backdrop-blur-md border border-ocean-300/50 shadow-[0_0_30px_rgba(0,0,0,0.8)] p-1 shrink-0 pb-10">
-          <div className="p-4 border-b border-ocean-300/30 bg-black/40">
-               <h2 className="text-green-400 font-mono text-xs tracking-[0.2em] animate-pulse">>>> INCOMING TRANSMISSION</h2>
+    <div key={data.id} className="h-full w-full flex flex-col md:flex-row bg-white overflow-hidden animate-in fade-in duration-500">
+      <div className="flex-1 flex flex-col relative h-1/2 md:h-full overflow-y-auto border-r border-slate-200 custom-scrollbar">
+          <div className="p-4 border-b border-slate-200 bg-slate-50 sticky top-0 z-20 flex justify-between items-center px-6 shadow-sm">
+             <div>
+                <h2 className="text-2xl font-black font-mono text-slate-900 uppercase tracking-tighter">{data.title}</h2>
+                <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest mt-0.5">Find and click all Past Tense verbs in the text!</p>
+             </div>
+             <div className={`transition-all duration-500 px-4 py-2 rounded-xl font-mono font-black shadow-lg flex flex-col items-center min-w-[120px] ${isComplete ? 'bg-green-600 scale-105' : 'bg-blue-600'}`}>
+                <span className="text-[10px] uppercase opacity-80">{isComplete ? 'Area Secured' : 'Past Actions'}</span>
+                <span className="text-xl flex items-center gap-2">
+                    {foundCount} / {totalVerbs}
+                    {isComplete && <span className="text-white animate-in zoom-in">✓</span>}
+                </span>
+             </div>
           </div>
-
-          <div className="p-6 md:p-10 flex flex-col items-center">
-              <h3 className="text-xl md:text-3xl font-bold mb-8 text-center font-mono">{content.question}</h3>
-              
-              <div className="flex flex-col md:flex-row gap-4 w-full">
-                  {content.options.map((option: any, idx: number) => (
-                      <button 
-                        key={idx}
-                        onClick={() => setSelectedOption(idx)}
-                        className={`flex-1 p-6 border-2 transition-all group relative overflow-hidden ${selectedOption === idx ? 'border-gold-500 bg-gold-900/20' : 'border-ocean-300 bg-black/50 hover:border-ocean-200'}`}
-                      >
-                          <div className="text-4xl mb-4 grayscale group-hover:grayscale-0 transition-all">{option.icon}</div>
-                          <div className="text-left">
-                              <div className="text-lg font-bold font-mono text-white mb-1">{option.text}</div>
-                              <div className="text-xs text-ocean-400">{option.subtext}</div>
-                          </div>
-                          {selectedOption === idx && <div className="absolute top-2 right-2 text-gold-500 text-xs font-mono">[SELECTED]</div>}
+          <div className="p-6 md:p-16 flex-1 font-serif text-xl md:text-4xl leading-[1.8] text-slate-800 space-y-12">
+             {paragraphs.map((para: string, idx: number) => (
+                <div key={idx} className="relative pl-10 border-l-8 border-slate-100 hover:border-blue-600 transition-colors">
+                    <p><ReadingParser text={para} onVerbFound={() => setFoundCount(c => c + 1)} /></p>
+                </div>
+             ))}
+          </div>
+          <div className="p-4 bg-slate-50 border-t border-slate-200 sticky bottom-0 z-20">
+              <div className="flex gap-2 overflow-x-auto pb-2 px-2 custom-scrollbar">
+                  {data.content.vocabulary?.map((v: Vocabulary, idx: number) => (
+                      <button key={idx} onClick={() => setActiveVocab(v)} className="whitespace-nowrap px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-800 text-sm font-mono font-black rounded-xl shadow-sm hover:border-blue-600 hover:text-blue-700 transition-all active:scale-95">
+                          {v.word}
                       </button>
                   ))}
               </div>
-              
-              <div className="mt-8 text-center border-t border-ocean-300/20 pt-4 w-full">
-                  <p className="text-ocean-400 text-xs font-mono">{content.prompt}</p>
-              </div>
+               {activeVocab && (
+                   <div className="absolute bottom-full left-0 right-0 bg-white border-t-8 border-blue-600 p-8 shadow-[0_-20px_50px_rgba(0,0,0,0.1)] z-30 animate-in slide-in-from-bottom-5">
+                       <div className="flex justify-between items-start max-w-3xl mx-auto">
+                           <div>
+                               <span className="text-blue-600 font-mono text-[10px] uppercase font-black tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Intel Definition</span>
+                               <div className="font-black text-slate-900 text-3xl mt-3">{activeVocab.word}</div>
+                               <div className="text-slate-700 text-xl italic mt-4 leading-relaxed font-serif bg-slate-50 p-4 rounded-xl border-l-4 border-slate-200">{activeVocab.definition}</div>
+                           </div>
+                           <button onClick={() => setActiveVocab(null)} className="text-2xl bg-slate-100 w-12 h-12 rounded-full flex items-center justify-center hover:bg-red-50 hover:text-red-600 transition-colors shadow-inner">✕</button>
+                       </div>
+                   </div>
+               )}
           </div>
+      </div>
+      <div className="flex-1 h-1/2 md:h-full relative bg-slate-200 overflow-hidden group">
+          <img src={data.content.backgroundImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[8s] ease-out" alt="Visual Recon" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/20"></div>
+          <div className="absolute bottom-6 right-6 text-white text-[10px] font-mono opacity-50 uppercase tracking-widest">Visual Recon Area // Intel-V5</div>
       </div>
     </div>
   );
 };
 
-// --- Reading (ARCHIVE FILE THEME) ---
-export const ReadingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-  const [activeVocab, setActiveVocab] = useState<Vocabulary | null>(null);
+// --- Scramble (Improved Scrolling & Layout) ---
+export const ScrambleSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [shuffledItems, setShuffledItems] = useState<ScrambleItem[]>([]);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [complete, setComplete] = useState(false);
+    
+    useEffect(() => {
+        if (data.content.items) {
+            setShuffledItems([...data.content.items].sort(() => Math.random() - 0.5));
+            setSelectedIds([]); 
+            setComplete(false);
+        }
+    }, [data.id]);
 
-  const renderInteractiveText = (text: string) => {
-    const parts = text.split(/(\b)/); 
-    return parts.map((part, index) => {
-      const vocabMatch = data.content.vocabulary?.find((v: Vocabulary) => v.word.toLowerCase() === part.toLowerCase());
-      if (vocabMatch) {
-        return (
-          <span 
-            key={index} 
-            onClick={(e) => { e.stopPropagation(); setActiveVocab(vocabMatch); }}
-            className={`cursor-pointer font-bold text-gold-300 hover:text-white hover:bg-gold-600/50 px-1 rounded transition-colors ${activeVocab === vocabMatch ? 'bg-gold-600 text-white' : ''}`}
-          >
-            {part}
-          </span>
-        );
-      }
-      return part;
-    });
-  };
-
-  const paragraphs = data.content.text.split(/\n\s*\n/);
-
-  return (
-    <div className="h-full w-full flex flex-col relative overflow-hidden bg-slate-900" onClick={() => setActiveVocab(null)}>
-      
-      {/* Main Content */}
-      <div className="relative z-10 w-full h-full flex flex-col">
-          {/* Header */}
-          <div className="p-4 bg-ocean-100 border-b border-ocean-300 flex justify-between items-center shadow-md">
-             <div>
-                <h2 className="text-lg md:text-2xl font-mono font-bold text-white uppercase tracking-wider">{data.title}</h2>
-                <p className="text-xs text-gold-500 font-mono">SECURE ARCHIVE /// {data.subtitle}</p>
-             </div>
-          </div>
-
-          {/* Text Area */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
-             <div className="max-w-4xl mx-auto bg-black/20 p-6 md:p-10 border-l-4 border-gold-600">
-                <div className="font-serif text-lg md:text-2xl leading-relaxed text-slate-300 space-y-6">
-                   {paragraphs.map((para: string, pIdx: number) => (
-                     <p key={pIdx}>{renderInteractiveText(para)}</p>
-                   ))}
-                </div>
-                
-                {/* Images in Text */}
-                {data.content.backgroundImage && (
-                    <div className="mt-8 border border-ocean-300 p-1 bg-ocean-100/50 transform rotate-1 shadow-lg w-full md:w-2/3 mx-auto">
-                        <img src={data.content.backgroundImage} className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700" alt="Historical Evidence" />
-                        <div className="text-center text-[10px] font-mono text-ocean-400 mt-1">FIG. 1.A - HISTORICAL RECORD</div>
-                    </div>
-                )}
-             </div>
-          </div>
-
-          {/* Vocab Overlay */}
-          <div className={`absolute bottom-0 left-0 right-0 bg-ocean-100 border-t-4 border-gold-500 p-6 transition-transform duration-300 ${activeVocab ? 'translate-y-0' : 'translate-y-full'}`}>
-              {activeVocab && (
-                  <div className="flex justify-between items-start max-w-4xl mx-auto">
-                      <div>
-                          <div className="text-xs text-gold-500 font-mono mb-1">DEFINITION:</div>
-                          <h4 className="text-3xl font-bold text-white capitalize mb-2">{activeVocab.word}</h4>
-                          <p className="text-lg text-slate-300 font-serif">"{activeVocab.definition}"</p>
-                      </div>
-                      <button onClick={(e) => { e.stopPropagation(); setActiveVocab(null); }} className="text-ocean-400 hover:text-white text-xl">✕</button>
-                  </div>
-              )}
-          </div>
-      </div>
-    </div>
-  );
-};
-
-// --- NEW COMPONENT: VERB CHALLENGE (Tactical Grid) ---
-export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-    const [revealed, setRevealed] = useState<Record<string, boolean>>({});
-
-    const handleReveal = (base: string) => {
-        setRevealed(prev => ({ ...prev, [base]: true }));
+    const handleSelect = (id: number) => {
+        if (selectedIds.includes(id) || complete) return;
+        if (id === selectedIds.length + 1) {
+            const next = [...selectedIds, id]; 
+            setSelectedIds(next);
+            if (next.length === data.content.items.length) setComplete(true);
+        }
     };
 
     return (
-        <div className="h-full flex flex-col items-center p-4 bg-slate-900 overflow-y-auto">
-            <div className="max-w-6xl w-full flex flex-col gap-6 pb-20">
-                <div className="text-center border-b border-ocean-300 pb-4">
-                    <h2 className="text-3xl md:text-5xl font-mono font-black text-white uppercase tracking-tighter">{data.title}</h2>
-                    <p className="text-green-500 font-mono animate-pulse">{data.subtitle}</p>
+        <div className="h-full w-full bg-[#1a1a1a] flex flex-col items-center justify-center p-4 overflow-hidden relative">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-leather.png')] opacity-30"></div>
+            
+            <div className="relative z-10 w-full max-w-7xl h-full flex flex-col overflow-hidden">
+                <div className="text-center py-4 shrink-0">
+                    <div className="inline-block bg-amber-600 text-slate-950 px-4 py-1 rounded-full text-xs font-mono font-black uppercase mb-2 shadow-xl animate-pulse tracking-widest">SITREP: Data Scramble Error</div>
+                    <h3 className="text-3xl md:text-5xl font-black text-amber-500 uppercase tracking-tighter drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] leading-none">{data.title}</h3>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch p-2 overflow-hidden">
+                    <div className="bg-slate-900/60 backdrop-blur-xl p-6 rounded-[2rem] border-4 border-slate-800 flex flex-col overflow-hidden">
+                        <div className="bg-slate-900/80 p-2 mb-4 rounded-lg text-slate-500 font-mono text-[10px] uppercase tracking-widest shrink-0">Scattered Log Fragments:</div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4 pb-10">
+                            {shuffledItems.map((item) => {
+                                const isUsed = selectedIds.includes(item.id);
+                                const rotation = ((item.id * 13) % 10) - 5; 
+                                return (
+                                    <button 
+                                        key={item.id} 
+                                        onClick={() => handleSelect(item.id)}
+                                        disabled={isUsed}
+                                        className={`w-full p-4 rounded-xl text-left font-serif transition-all transform shadow-lg relative ${
+                                            isUsed 
+                                            ? 'opacity-0 scale-50 grayscale pointer-events-none translate-x-full absolute' 
+                                            : 'bg-[#fffcf0] border-l-[10px] border-amber-600 text-slate-800 hover:-translate-y-1 hover:shadow-amber-500/20 group active:scale-95'
+                                        }`}
+                                        style={{ transform: `rotate(${isUsed ? 0 : rotation}deg)` }}
+                                    >
+                                        <div className="text-[9px] text-amber-700 font-mono font-black mb-1 opacity-60 uppercase tracking-widest border-b border-amber-900/10 pb-1">Archive ID: #{item.id.toString().padStart(3, '0')}</div>
+                                        <div className="text-base md:text-xl font-black leading-tight">{item.parts.join(' ')}</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-950/90 p-8 rounded-[2rem] border-4 border-slate-900 flex flex-col shadow-inner overflow-hidden">
+                        <div className="mb-4 flex justify-between items-end border-b-2 border-slate-800 pb-2 shrink-0">
+                            <p className="text-amber-500 font-mono text-[10px] uppercase tracking-widest font-black">Timeline Recovery Status:</p>
+                            <p className="text-slate-600 font-mono text-xs">{selectedIds.length} / {data.content.items.length}</p>
+                        </div>
+                        <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2 pb-10">
+                            {Array.from({ length: data.content.items.length }).map((_, i) => {
+                                const filledItem = data.content.items.find((item: any) => item.id === selectedIds[i]);
+                                return (
+                                    <div key={i} className={`min-h-[60px] md:min-h-[70px] rounded-xl border flex items-center px-6 transition-all duration-500 group ${
+                                        filledItem 
+                                        ? 'bg-green-950/20 border-green-500 text-green-100 shadow-[0_0_20px_rgba(34,197,94,0.1)]' 
+                                        : 'bg-slate-900/30 border-slate-800 border-dashed text-slate-600'
+                                    }`}>
+                                        <span className={`text-[10px] font-mono font-black mr-4 transition-colors ${filledItem ? 'text-green-500' : 'opacity-20'}`}>STEP 0{i+1}</span>
+                                        <span className={`text-base md:text-xl font-serif italic ${filledItem ? 'opacity-100' : 'opacity-30'}`}>
+                                            {filledItem ? filledItem.parts.join(' ') : '— ACCESSING INTEL —'}
+                                        </span>
+                                        {filledItem && <span className="ml-auto text-green-500 text-xl animate-in zoom-in">✓</span>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {complete && (
+                            <div className="mt-4 bg-green-600 text-white font-mono font-black text-center py-4 rounded-xl shadow-[0_0_50px_rgba(22,163,74,0.4)] animate-in slide-in-from-bottom-8 text-xl tracking-[0.4em] uppercase shrink-0">
+                                CHRONOLOGY VERIFIED
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Verb Challenge ---
+export const VerbChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [revealedIds, setRevealedIds] = useState<Set<number>>(new Set());
+
+    const toggleReveal = (idx: number) => {
+        setRevealedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(idx)) next.delete(idx);
+            else next.add(idx);
+            return next;
+        });
+    };
+
+    const getRule = (item: VerbChallengeItem) => {
+        const base = item.base.toUpperCase();
+        const past = item.past.toUpperCase();
+        if (base.endsWith('E')) return `${base} + D`;
+        if (base.endsWith('Y') && past.endsWith('IED')) return `${base} (Y ➔ IED)`;
+        if (base === 'SWAP') return `${base} (+P) + ED`;
+        return `${base} + ED`;
+    };
+
+    return (
+        <div className="h-full flex flex-col items-center p-2 bg-slate-900 overflow-y-auto pt-4 pb-12 custom-scrollbar">
+            <div className="max-w-7xl w-full flex flex-col gap-6">
+                <div className="text-center border-b-2 border-slate-800 pb-4 relative">
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-0.5 rounded-full text-[10px] font-mono font-black tracking-widest animate-pulse">CLASSIFIED DATABASE</div>
+                    <h2 className="text-3xl md:text-5xl font-mono font-black text-white uppercase tracking-tighter drop-shadow-sm">{data.title}</h2>
+                    <p className="text-blue-500 font-mono font-black tracking-[0.3em] uppercase mt-2 text-xs md:text-sm">Click cards to decode Past Simple data</p>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {data.content.verbs.map((item: VerbChallengeItem, idx: number) => {
-                        const isRevealed = revealed[item.base];
+                        const isRevealed = revealedIds.has(idx);
                         return (
-                            <button
-                                key={idx}
-                                onClick={() => handleReveal(item.base)}
-                                className={`h-24 md:h-32 border-2 relative overflow-hidden transition-all duration-300 group ${isRevealed ? 'border-green-500 bg-green-900/20' : 'border-ocean-300 bg-ocean-100 hover:border-gold-400'}`}
+                            <button 
+                                key={idx} 
+                                onClick={() => toggleReveal(idx)}
+                                className={`h-32 md:h-40 perspective-1000 group relative transition-all duration-700 w-full active:scale-95`}
                             >
-                                <div className="absolute top-2 left-2 text-[10px] font-mono text-ocean-400 uppercase">
-                                    V-CODE: {idx + 1}
+                                <div className={`relative w-full h-full transition-all duration-700 preserve-3d ${isRevealed ? 'rotate-y-180 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : ''}`}>
+                                    <div className={`absolute inset-0 backface-hidden flex flex-col items-center justify-center p-4 bg-slate-800 border-2 border-slate-700 rounded-2xl shadow-xl`}>
+                                        <div className="text-[9px] text-slate-500 font-mono uppercase mb-2 tracking-widest">Base Proto</div>
+                                        <div className="text-xl md:text-2xl font-mono font-black text-slate-300 uppercase">{item.base}</div>
+                                        <div className="mt-4 text-[8px] text-blue-500 font-mono animate-pulse uppercase tracking-widest">[ DECODE ]</div>
+                                    </div>
+                                    <div className={`absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-4 bg-blue-900 border-2 border-blue-500 rounded-2xl shadow-inner`}>
+                                        <div className="text-[9px] text-blue-300 font-mono uppercase mb-1 tracking-widest font-black opacity-80">{getRule(item)}</div>
+                                        <div className="text-2xl md:text-3xl font-mono font-black text-white uppercase drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">{item.past}</div>
+                                        <div className="mt-3 w-8 h-0.5 bg-white/20 rounded-full"></div>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col items-center justify-center h-full">
-                                    {isRevealed ? (
-                                        <>
-                                            <span className="text-xs text-green-500 font-mono mb-1">PAST FORM:</span>
-                                            <span className="text-xl md:text-2xl font-black text-white uppercase tracking-wider animate-in zoom-in">{item.past}</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="text-lg md:text-xl font-bold text-slate-300 uppercase group-hover:text-gold-400">{item.base}</span>
-                                            <span className="text-[10px] text-ocean-500 mt-2 font-mono group-hover:text-white">[CLICK TO DECRYPT]</span>
-                                        </>
-                                    )}
-                                </div>
-                                {isRevealed && (
-                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-green-500 shadow-[0_0_10px_#22c55e]"></div>
-                                )}
                             </button>
                         );
                     })}
                 </div>
             </div>
+            <style>{`
+                .perspective-1000 { perspective: 1000px; }
+                .preserve-3d { transform-style: preserve-3d; }
+                .backface-hidden { backface-visibility: hidden; }
+                .rotate-y-180 { transform: rotateY(180deg); }
+            `}</style>
         </div>
     );
 };
 
-
-// --- Comprehension MC (TACTICAL QUIZ) ---
-export const ComprehensionMCSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-  const [selections, setSelections] = useState<Record<number, number>>({});
-
-  const highlights = data.content.questions.map((q: QuestionMC, index: number) => ({
-      id: q.id,
-      text: q.contextHighlight || '',
-      colorClass: HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length]
-  })).filter((h: HighlightData) => h.text !== '');
-
-  return (
-    <div className="h-full flex flex-col items-center p-4 overflow-y-auto bg-slate-900 justify-start pt-8 pb-20 relative">
-      <TextReferenceModal text={data.content.referenceText} highlights={highlights} />
-
-      <div className="w-full max-w-6xl relative z-10 shrink-0">
-         <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-mono font-bold text-white uppercase">{data.subtitle}</h2>
-            <div className="h-1 w-24 bg-blue-600 mx-auto mt-2"></div>
-         </div>
-         
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.content.questions.map((q: QuestionMC, idx: number) => {
-               const selection = selections[q.id];
-               const showResult = selection !== undefined;
-               
-               return (
-                  <div key={q.id} className="bg-ocean-100 border border-ocean-300 p-4 rounded-sm flex flex-col gap-4 hover:border-blue-500 transition-colors">
-                     <div className="flex gap-3">
-                        <div className="w-8 h-8 bg-black border border-ocean-300 flex items-center justify-center font-mono text-xs text-blue-400 shrink-0">0{q.id}</div>
-                        <h4 className="text-white font-bold text-lg">{q.question}</h4>
-                     </div>
-                     <div className="space-y-2">
-                        {q.options.map((opt, optIdx) => {
-                           let btnClass = "w-full text-left p-3 border font-mono text-sm transition-all relative ";
-                           if (showResult) {
-                              if (optIdx === q.correctIndex) btnClass += "bg-green-900/50 border-green-500 text-green-100";
-                              else if (optIdx === selection) btnClass += "bg-red-900/50 border-red-500 text-red-100";
-                              else btnClass += "border-transparent opacity-30";
-                           } else {
-                              btnClass += "bg-transparent border-ocean-300 text-slate-300 hover:bg-ocean-200 hover:text-white";
-                           }
-                           return (
-                              <button key={optIdx} onClick={() => !showResult && setSelections(prev => ({...prev, [q.id]: optIdx}))} className={btnClass}>
-                                 <span className="opacity-50 mr-2">[{String.fromCharCode(65+optIdx)}]</span> {opt}
-                              </button>
-                           );
-                        })}
-                     </div>
-                     {showResult && (
-                         <div className="text-xs font-mono text-ocean-400 border-t border-ocean-300/30 pt-2 mt-auto">
-                             > ANALYSIS: {q.explanation}
-                         </div>
-                     )}
-                  </div>
-               );
-            })}
-         </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Grammar (ENGINE ROOM LOGIC) ---
-export const GrammarSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-  const [inputs, setInputs] = useState<Record<number, string>>({});
-  const [checked, setChecked] = useState(false);
-  const checkAnswers = () => setChecked(true);
-
-  return (
-    <div className="h-full flex flex-col items-center justify-center p-4 overflow-y-auto pb-20 bg-slate-900">
-      <div className="bg-ocean-100 border border-ocean-300 p-8 max-w-4xl w-full shadow-2xl relative">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600"></div>
-        
-        <div className="text-center mb-8">
-            <h3 className="text-2xl font-mono font-bold text-white">{data.title}</h3>
-            <p className="text-ocean-400 font-mono text-sm">{data.subtitle}</p>
-        </div>
-
-        <div className="space-y-6">
-          {data.content.items.map((item: GrammarItem) => {
-             const userVal = (inputs[item.id] || "").toLowerCase().trim();
-             const possibleAnswers = item.correctAnswer.split('/').map(s => s.trim().toLowerCase());
-             const isCorrect = possibleAnswers.includes(userVal);
-             return (
-               <div key={item.id} className="flex flex-wrap items-center text-lg md:text-2xl border-b border-ocean-200/20 pb-2 text-slate-300">
-                 <span className="text-gold-500 font-mono text-sm mr-4">0{item.id}</span>
-                 <span className="mr-2">{item.prefix}</span>
-                 <input 
-                    type="text" 
-                    value={inputs[item.id] || ""} 
-                    onChange={(e) => { setChecked(false); setInputs({...inputs, [item.id]: e.target.value}); }} 
-                    className={`bg-black/50 border-b-2 text-center w-32 font-mono text-white focus:outline-none transition-colors ${checked ? (isCorrect ? 'border-green-500' : 'border-red-500') : 'border-ocean-300 focus:border-gold-400'}`} 
-                 />
-                 <span className="ml-2">{item.suffix}</span>
-               </div>
-             );
-          })}
-        </div>
-        
-        <div className="mt-10 flex justify-center">
-          <button onClick={checkAnswers} className="bg-gold-600 hover:bg-gold-500 text-black font-bold font-mono py-3 px-12 uppercase tracking-widest shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-            Verify Logic
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Drill (TARGET PRACTICE) ---
-export const DrillSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+// --- Grammar Recap (Full Sentence Engine) ---
+export const GrammarRecapSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     return (
-        <div className="h-full flex flex-col items-center justify-center p-4 bg-slate-900 overflow-y-auto pb-20">
-             <div className="max-w-4xl w-full">
-                <div className="text-center mb-8">
-                    <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{data.title}</h3>
-                    <p className="text-red-400 font-mono animate-pulse">{data.subtitle}</p>
+        <div className="h-full flex flex-col items-center p-4 bg-slate-100 overflow-y-auto pt-10 pb-20 custom-scrollbar">
+             <div className="max-w-6xl w-full">
+                <div className="text-center mb-10">
+                    <h2 className="text-5xl font-black font-mono text-slate-900 uppercase tracking-tighter">{data.title}</h2>
+                    <p className="text-blue-700 font-mono font-black mt-2 tracking-[0.4em] uppercase">{data.subtitle}</p>
+                </div>
+
+                <div className="bg-white border-4 border-blue-700 rounded-3xl p-8 shadow-2xl mb-12 transform hover:scale-[1.01] transition-all">
+                    <h3 className="font-black text-blue-900 text-xl mb-6 flex items-center gap-4 uppercase tracking-tighter"><span className="w-5 h-5 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,1)]"></span> THE FULL SENTENCE ENGINE</h3>
+                    <div className="bg-slate-950 p-8 rounded-2xl font-mono text-center text-xl md:text-3xl text-white border-b-8 border-blue-900 shadow-inner flex flex-wrap justify-center items-center gap-3">
+                        <span className="bg-blue-600 px-3 py-1 rounded">SUBJECT</span>
+                        <span>+</span>
+                        <span className="bg-green-600 px-3 py-1 rounded">VERB+ed</span>
+                        <span>+</span>
+                        <span className="bg-amber-600 px-3 py-1 rounded">OBJECT</span>
+                        <span>+</span>
+                        <span className="bg-purple-600 px-3 py-1 rounded">PLACE</span>
+                        <span>+</span>
+                        <span className="bg-red-600 px-3 py-1 rounded">TIME</span>
+                    </div>
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 font-serif text-lg md:text-2xl italic text-slate-700 p-4">
+                        <p className="border-l-4 border-blue-200 pl-4">"I <span className="text-green-600 font-black">cleaned</span> the deck at the port <span className="text-red-600 font-black">yesterday</span>."</p>
+                        <p className="border-l-4 border-blue-200 pl-4">"He <span className="text-green-600 font-black">passed</span> the test in Yalova <span className="text-red-600 font-black">two days ago</span>."</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div className="bg-slate-900 text-white rounded-3xl p-10 shadow-xl border-t-8 border-red-500">
+                        <h3 className="font-black text-red-500 text-2xl mb-6 uppercase tracking-tighter">TIME ADVERBS (TACTICAL TIME)</h3>
+                        <div className="grid grid-cols-2 gap-4 font-mono text-base md:text-xl">
+                            <div className="flex items-center gap-2">🚩 Yesterday</div>
+                            <div className="flex items-center gap-2">🚩 Two days ago</div>
+                            <div className="flex items-center gap-2">🚩 Last night</div>
+                            <div className="flex items-center gap-2">🚩 Last week</div>
+                            <div className="flex items-center gap-2">🚩 Last month</div>
+                            <div className="flex items-center gap-2">🚩 In 2023</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-4 border-slate-200 rounded-3xl p-10 shadow-xl hover:border-red-500 transition-all">
+                        <h3 className="font-black text-slate-900 text-2xl mb-6 flex items-center gap-4 uppercase tracking-tighter"><span className="w-4 h-4 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,1)]"></span> NEGATIVE OPS</h3>
+                        <div className="bg-slate-50 p-6 rounded-2xl mb-6 font-mono text-center text-2xl text-red-900 border-2 border-slate-100 shadow-inner uppercase">
+                           SUBJECT + <span className="text-red-700 font-black">didn't</span> + BASE VERB
+                        </div>
+                        <ul className="space-y-3 text-slate-700 text-lg font-serif leading-relaxed italic">
+                            <li>✅ I <span className="text-red-700 font-black underline">didn't clean</span> the dorm last night.</li>
+                            <li>✅ He <span className="text-red-700 font-black underline">didn't study</span> for exams yesterday.</li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-white border-4 border-slate-200 rounded-3xl p-10 shadow-xl md:col-span-2 hover:border-amber-500 transition-all">
+                        <h3 className="font-black text-slate-900 text-2xl mb-6 uppercase tracking-tighter flex items-center gap-4"><span className="w-4 h-4 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,1)]"></span> WH- INTERROGATION</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {data.content.whExamples?.map((item: any, idx: number) => (
+                                <div key={idx} className="font-serif text-xl text-slate-800 p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-sm">
+                                    ➡ {item.question} 
+                                    <span className="text-xs text-slate-400 font-mono block uppercase mt-2 font-black tracking-widest border-t pt-2 border-slate-200">Context: {item.context}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-amber-100 border-l-[12px] border-amber-600 p-8 rounded-2xl shadow-lg">
+                    <div className="flex items-center gap-4 mb-4">
+                        <span className="text-3xl text-amber-700">⚠️</span>
+                        <h4 className="text-amber-900 font-mono font-black text-xl md:text-2xl uppercase tracking-tighter">ALERT: IRREGULAR PROTOCOLS</h4>
+                    </div>
+                    <p className="text-amber-800 text-lg md:text-xl font-serif leading-relaxed">
+                        Attention recruits! Irregular verbs ignore the **-ed** rule. For example: <span className="font-bold">go → went</span>. Focus on the regular **-ed** pattern for this mission.
+                    </p>
+                </div>
+             </div>
+        </div>
+    );
+};
+
+// --- Tactical Drill (3x5 Grid Layout) ---
+export const TacticalDrillSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [selections, setSelections] = useState<Record<number, string>>({});
+    const [results, setResults] = useState<Record<number, boolean | null>>({});
+    const handleSelect = (id: number, opt: string) => {
+        if (results[id] !== undefined) return;
+        const scenario = data.content.scenarios.find((s:any)=>s.id===id);
+        const isCorrect = scenario.correct === opt;
+        setSelections({...selections, [id]: opt});
+        setResults({...results, [id]: isCorrect});
+    };
+    return (
+        <div className="h-full flex flex-col items-center p-4 bg-slate-900 text-white overflow-y-auto pt-6 pb-20 custom-scrollbar">
+             <div className="max-w-7xl w-full space-y-6">
+                <div className="text-center border-b border-slate-800 pb-4 shrink-0">
+                    <h2 className="text-3xl md:text-5xl font-black font-mono text-blue-400 uppercase tracking-tighter animate-pulse">{data.title}</h2>
+                    <p className="text-slate-500 font-mono mt-2 tracking-widest uppercase text-[10px]">RECOVERY GRID: SELECT CORRECT TRANSMISSIONS</p>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.content.items && data.content.items.map((item: DrillItem) => (
-                        <div key={item.id} className="p-6 bg-ocean-100 border border-ocean-300 flex flex-col items-center text-center hover:bg-ocean-200 transition-colors">
-                             <div className="text-4xl mb-2 text-gold-500 font-black">
-                                 {item.text.split('->')[1]?.trim() || "???"}
-                             </div>
-                             <div className="text-xs font-mono text-ocean-400 uppercase tracking-widest">
-                                 BASE: {item.text.split('->')[0]}
-                             </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.content.scenarios.map((scenario: any) => (
+                        <div key={scenario.id} className={`p-5 rounded-xl border-2 transition-all shadow-xl flex flex-col justify-between ${results[scenario.id] === true ? 'bg-green-950/40 border-green-500' : results[scenario.id] === false ? 'bg-red-950/40 border-red-500 animate-shake' : 'bg-slate-950/30 border-slate-800 hover:border-blue-600'}`}>
+                            <div>
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-[9px] font-mono text-slate-400 uppercase bg-slate-950 px-2 py-1 rounded border border-white/5">SEQ-{scenario.id} // {scenario.category}</span>
+                                </div>
+                                
+                                <div className="bg-blue-900/20 border-l-2 border-blue-500 p-3 mb-4 rounded shadow-inner">
+                                    <span className="text-[9px] font-mono text-blue-400 block uppercase font-black tracking-widest mb-1">Signal Context:</span>
+                                    <span className="text-sm font-mono text-slate-200 italic leading-tight block">"{scenario.context}"</span>
+                                </div>
+
+                                <p className="text-base md:text-lg font-serif mb-4 leading-tight min-h-[3.5rem]">
+                                    {scenario.question.split('_______').map((part: string, i: number) => (
+                                        <React.Fragment key={i}>
+                                            {part}
+                                            {i === 0 && <span className={`inline-block border-b-2 min-w-[60px] text-center font-black px-1 transition-all ${results[scenario.id] === true ? 'text-green-400 border-green-400' : results[scenario.id] === false ? 'text-red-500 border-red-500 line-through' : 'text-blue-400 border-blue-500 animate-pulse'}`}>{selections[scenario.id] || "_______"}</span>}
+                                        </React.Fragment>
+                                    ))}
+                                    {results[scenario.id] === false && <span className="text-green-400 font-black ml-2 animate-in zoom-in text-xs bg-green-900/40 px-2 py-0.5 rounded">[{scenario.correct}]</span>}
+                                </p>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                {scenario.options.map((opt: string) => (
+                                    <button 
+                                        key={opt} 
+                                        onClick={() => handleSelect(scenario.id, opt)} 
+                                        disabled={results[scenario.id] !== undefined} 
+                                        className={`flex-1 py-2 rounded text-xs font-mono font-black transition-all shadow-lg ${
+                                            results[scenario.id] !== undefined 
+                                            ? (scenario.correct === opt ? 'bg-green-600' : (selections[scenario.id] === opt ? 'bg-red-600 opacity-50 scale-95' : 'bg-slate-800 opacity-20')) 
+                                            : 'bg-blue-700 hover:bg-blue-600 active:scale-95'
+                                        }`}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+             </div>
+             <style>{`@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } } .animate-shake { animation: shake 0.4s ease-in-out; }`}</style>
+        </div>
+    );
+};
+
+// --- Classroom Game Slide ---
+export const ClassroomGameSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [selectedQ, setSelectedQ] = useState<{ cat: string; q: any } | null>(null);
+    const [revealedA, setRevealedA] = useState(false);
+    const [clickedTiles, setClickedTiles] = useState<Set<string>>(new Set());
+    return (
+        <div className="h-full w-full bg-slate-950 text-white p-6 flex flex-col items-center overflow-y-auto custom-scrollbar">
+             <div className="max-w-7xl w-full h-full flex flex-col gap-10">
+                <div className="text-center border-b-4 border-slate-800 pb-8"><h2 className="text-5xl md:text-8xl font-black font-mono text-amber-500 uppercase tracking-tighter drop-shadow-2xl">{data.title}</h2><p className="text-slate-400 font-mono tracking-[0.5em] uppercase mt-4 text-sm md:text-xl font-black">{data.subtitle}</p></div>
+                {!selectedQ ? (
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-10 pt-4 pb-20">
+                        {data.content.categories.map((cat: any) => (
+                            <div key={cat.name} className="flex flex-col gap-6">
+                                <div className="bg-slate-900 p-8 text-center font-mono font-black text-3xl border-b-[12px] border-amber-600 rounded-3xl shadow-2xl tracking-tighter">{cat.name}</div>
+                                {cat.questions.map((q: any) => <button key={q.points} onClick={() => { setSelectedQ({ cat: cat.name, q }); setRevealedA(false); setClickedTiles(new Set(clickedTiles).add(`${cat.name}-${q.points}`)); }} className={`flex-1 min-h-[160px] flex items-center justify-center text-7xl font-black font-mono rounded-[2.5rem] transition-all border-8 shadow-2xl ${clickedTiles.has(`${cat.name}-${q.points}`) ? 'bg-slate-900 border-slate-800 text-slate-800 grayscale' : 'bg-blue-900 border-blue-700 text-amber-400 hover:bg-blue-700 hover:scale-110 active:scale-95'}`}>{q.points}</button>)}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center p-12 bg-slate-900 border-[16px] border-amber-600 rounded-[4rem] animate-in zoom-in shadow-[0_0_150px_rgba(245,158,11,0.2)] mx-4 md:mx-20 my-10 relative"><span className="text-amber-500 font-mono text-3xl mb-6 uppercase font-black tracking-[0.4em]">Category: {selectedQ.cat} // Reward: {selectedQ.q.points}</span><h3 className="text-5xl md:text-8xl font-black text-center mb-24 font-serif text-white leading-tight drop-shadow-xl">"{selectedQ.q.q}"</h3><div className="flex flex-col gap-8 w-full max-w-4xl">{revealedA && <div className="p-14 bg-green-600/20 border-8 border-green-500 rounded-[3rem] text-center text-6xl md:text-9xl font-black animate-in slide-in-from-bottom-12 text-green-400 shadow-[0_0_60px_rgba(34,197,94,0.4)] tracking-tighter uppercase">{selectedQ.q.a}</div>}<div className="flex flex-col md:flex-row gap-6">{!revealedA && <button onClick={() => setRevealedA(true)} className="flex-1 bg-amber-600 text-slate-950 py-10 font-black rounded-[2rem] text-4xl hover:bg-amber-500 active:scale-95 uppercase tracking-widest border-b-[12px] border-amber-800">REVEAL DECODED DATA</button>}<button onClick={() => setSelectedQ(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 py-10 font-black rounded-[2rem] text-4xl active:scale-95 uppercase tracking-widest border-8 border-slate-700">RETURN TO COMMAND GRID</button></div></div></div>
+                )}
+             </div>
+        </div>
+    );
+};
+
+// --- FULL IMPLEMENTATIONS ---
+
+export const GrammarAnalysisSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    return (
+        <div className="h-full w-full bg-slate-50 p-6 md:p-12 overflow-y-auto custom-scrollbar">
+             <div className="max-w-5xl w-full mx-auto">
+                <div className="text-center mb-10 border-b-2 border-slate-200 pb-6"><h2 className="text-3xl font-mono font-black text-slate-900 uppercase tracking-tighter">{data.title}</h2><p className="text-blue-600 font-mono font-bold mt-2 uppercase tracking-widest">{data.subtitle}</p></div>
+                <div className="flex flex-col gap-6">
+                    {data.content.cards.map((card: any, idx: number) => (
+                        <div key={idx} className="bg-white border border-slate-200 rounded-lg shadow-md flex flex-col md:flex-row overflow-hidden hover:shadow-lg transition-shadow">
+                             <div className="w-full md:w-1/3 bg-blue-50 p-6 flex flex-col justify-center border-b md:border-b-0 md:border-r border-blue-100"><h3 className="font-bold text-blue-900 text-xl mb-2">{card.title}</h3><div className="bg-white text-blue-700 font-mono text-2xl font-black px-4 py-2 rounded border border-blue-200 self-start shadow-sm">{card.suffixDisplay}</div></div>
+                             <div className="w-full md:w-2/3 p-6 flex flex-col justify-center font-serif italic text-slate-800 text-xl font-black">{card.contextSentence.split('**').map((p:string, i:number) => i%2===1 ? <span key={i} className="text-blue-700 underline">{p}</span> : p)}<p className="text-xs text-slate-400 font-mono mt-4 uppercase">Rule: {card.rule}</p></div>
                         </div>
                     ))}
                 </div>
@@ -495,173 +585,162 @@ export const DrillSlide: React.FC<{ data: SlideData }> = ({ data }) => {
     );
 };
 
-// --- Matching (DECRYPTION) ---
-export const MatchingSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [matchedIds, setMatchedIds] = useState<number[]>([]);
-    const [rightItems, setRightItems] = useState<MatchingPair[]>([]);
-    
-    useEffect(() => {
-        if (data.content.pairs) {
-            setRightItems([...(data.content.pairs as MatchingPair[])].sort(() => Math.random() - 0.5));
-        }
-    }, [data.content.pairs]);
-
-    const handleLeftClick = (id: number) => {
-        if (matchedIds.includes(id)) return;
-        setSelectedId(id === selectedId ? null : id);
-    };
-
-    const handleRightClick = (id: number) => {
-        if (matchedIds.includes(id)) return;
-        if (selectedId === null) return;
-        if (selectedId === id) {
-            setMatchedIds([...matchedIds, id]);
-            setSelectedId(null);
-        } else {
-            setSelectedId(null);
-        }
-    };
-
+export const DailyReportSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [inputs, setInputs] = useState<Record<number, string>>({});
+    const [submitted, setSubmitted] = useState(false);
     return (
-        <div className="h-full flex flex-col items-center p-4 overflow-y-auto bg-slate-900 justify-start pt-10 pb-20">
-             <div className="max-w-6xl w-full shrink-0">
-                <div className="text-center mb-8">
-                    <h3 className="text-3xl font-mono font-bold text-white">{data.title}</h3>
-                    <p className="text-ocean-400">{data.subtitle}</p>
-                </div>
-
-                <div className="flex flex-col md:flex-row gap-8 justify-center items-stretch">
-                    {/* Left Column */}
-                    <div className="flex-1 space-y-3">
-                        {data.content.pairs.map((pair: MatchingPair) => {
-                            const isMatched = matchedIds.includes(pair.id);
-                            const isSelected = selectedId === pair.id;
-                            
-                            return (
-                                <button
-                                    key={pair.id}
-                                    onClick={() => handleLeftClick(pair.id)}
-                                    disabled={isMatched}
-                                    className={`w-full p-4 text-left border font-mono text-sm transition-all ${
-                                        isMatched ? 'border-green-500 text-green-500 opacity-50 bg-black' :
-                                        isSelected ? 'border-gold-500 bg-gold-900/20 text-white' :
-                                        'border-ocean-300 bg-ocean-100 text-slate-300 hover:border-ocean-200'
-                                    }`}
-                                >
-                                    <span className="text-xs opacity-50 mr-2">CODE-{pair.id}</span>
-                                    {pair.left}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="flex-1 space-y-3">
-                         {rightItems.map((pair: MatchingPair) => {
-                            const isMatched = matchedIds.includes(pair.id);
-                            
-                            return (
-                                <button
-                                    key={pair.id}
-                                    onClick={() => handleRightClick(pair.id)}
-                                    disabled={isMatched}
-                                    className={`w-full p-4 text-right border font-mono text-sm transition-all ${
-                                        isMatched ? 'border-green-500 text-green-500 opacity-50 bg-black' :
-                                        (selectedId !== null && !isMatched) ? 'border-blue-500 bg-blue-900/20 text-white animate-pulse cursor-pointer' :
-                                        'border-ocean-300 bg-ocean-100 text-slate-300 opacity-50'
-                                    }`}
-                                >
-                                     {pair.right}
-                                </button>
-                            );
-                         })}
-                    </div>
-                </div>
-             </div>
-        </div>
-    );
-};
-
-// --- Debrief (PROMOTION CEREMONY) ---
-export const DebriefSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-    const [promoted, setPromoted] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setPromoted(true), 2000);
-        return () => clearTimeout(timer);
-    }, []);
-
-    return (
-        <div className="h-full w-full flex items-center justify-center bg-black relative overflow-hidden">
-             {/* Background Particles */}
-             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 animate-pulse"></div>
-
-             <div className="relative z-10 w-full max-w-5xl flex flex-col items-center">
-                 <h1 className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tighter">{data.title}</h1>
-                 <p className="text-gold-500 font-mono text-xl tracking-[0.5em] mb-12">{data.subtitle}</p>
-
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-8">
-                     {data.content.checklist.map((item: DebriefItem, i: number) => (
-                         <div key={i} className="bg-ocean-100 border border-ocean-300 p-4 flex justify-between items-center opacity-0 animate-in slide-in-from-bottom-5 fill-mode-forwards" style={{animationDelay: `${i * 200}ms`}}>
-                             <span className="font-mono text-ocean-400 text-sm">{item.text}</span>
-                             <span className="font-bold text-green-400">{item.reflection}</span>
-                         </div>
-                     ))}
-                 </div>
-
-                 {/* Rank Badge Animation */}
-                 <div className={`mt-12 transition-all duration-1000 transform ${promoted ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}>
-                     <div className="w-48 h-48 bg-gold-600 rounded-full flex items-center justify-center shadow-[0_0_100px_rgba(234,179,8,0.6)] relative">
-                         <div className="absolute inset-0 border-4 border-white rounded-full animate-ping opacity-20"></div>
-                         <span className="text-7xl">⭐⭐</span>
-                     </div>
-                     <div className="text-center mt-6 text-gold-300 font-mono text-sm">AUTHORIZATION CODE: DELTA-9</div>
-                 </div>
-             </div>
-        </div>
-    );
-};
-
-// Placeholders for other types to prevent errors, styled minimally
-export const ChecklistSlide: React.FC<{ data: SlideData }> = ({ data }) => {
-    return (
-        <div className="h-full flex flex-col items-center p-4 bg-slate-900 pt-10">
-            <div className="bg-ocean-100 border border-ocean-300 p-8 w-full max-w-4xl">
-                 <h3 className="text-white font-mono text-2xl mb-6">{data.title}</h3>
-                 <div className="space-y-4">
-                     {data.content.items.map((item: ChecklistItem) => (
-                         <div key={item.id} className="flex items-center gap-4 text-slate-300 border-b border-ocean-200 pb-2">
-                             <div className="w-6 h-6 border border-gold-500 flex items-center justify-center text-gold-500 text-xs">{item.isCorrect ? '✓' : ''}</div>
-                             <span>{item.text}</span>
-                         </div>
-                     ))}
-                 </div>
+        <div className="h-full flex flex-col items-center p-4 bg-slate-200 overflow-y-auto pt-10 pb-24">
+            <div className="w-full max-w-5xl bg-white shadow-2xl min-h-[700px] flex flex-col md:flex-row overflow-hidden rounded-3xl border-8 border-slate-900">
+                <div className="bg-slate-900 text-white p-8 md:w-24 flex md:flex-col items-center justify-center border-r border-slate-700 shrink-0"><div className="md:-rotate-90 font-mono font-black tracking-[0.5em] uppercase text-2xl whitespace-nowrap">CADET LOG</div></div>
+                <div className="flex-1 p-10 md:p-16 bg-[url('https://www.transparenttextures.com/patterns/lined-paper.png')]"><div className="border-b-4 border-slate-900 pb-6 mb-10"><div><h2 className="text-4xl font-serif font-black text-slate-900 uppercase tracking-tight">Daily Activity Report</h2><p className="text-slate-500 font-mono text-xs uppercase mt-2 font-black">Classification: UNRESTRICTED</p></div></div><div className="font-serif text-2xl md:text-3xl leading-[1.8] text-slate-800">{data.content.segments.map((seg: any, idx: number) => seg.type === 'text' ? <span key={idx} className="whitespace-pre-wrap">{seg.value}</span> : <span key={idx} className="inline-block relative mx-2"><input type="text" value={inputs[seg.id] || ""} onChange={(e) => { setInputs({...inputs, [seg.id]: e.target.value}); setSubmitted(false); }} placeholder={`(${seg.hint})`} className={`border-b-4 px-3 py-1 outline-none w-48 text-center font-mono font-black transition-all bg-transparent ${submitted ? ((inputs[seg.id] || "").trim().toLowerCase() === seg.answer.toLowerCase() ? 'text-green-600 border-green-500' : 'text-red-600 border-red-500') : 'border-slate-300 focus:border-blue-600'}`} />{submitted && (inputs[seg.id] || "").trim().toLowerCase() !== seg.answer.toLowerCase() && <span className="absolute -bottom-8 left-0 text-xs text-red-700 font-mono font-black uppercase bg-red-50 px-2 rounded-lg border border-red-100">{seg.answer}</span>}</span>)}</div><div className="mt-16 flex justify-center"><button onClick={() => setSubmitted(true)} className="bg-blue-800 text-white font-mono font-black py-5 px-14 rounded-2xl shadow-2xl uppercase tracking-[0.3em] hover:bg-blue-900 active:scale-95 border-b-8 border-blue-950">SUBMIT REPORT</button></div></div>
             </div>
         </div>
     );
-}
+};
 
-export const MediaSlide: React.FC<{ data: SlideData }> = () => <div className="text-white">Media Placeholder</div>;
-export const LogicPuzzleSlide: React.FC<{ data: SlideData }> = () => null;
-export const ComprehensionTFSlide: React.FC<{ data: SlideData }> = () => null;
-export const SpeakingSlide: React.FC<{ data: SlideData }> = () => null;
-export const QASlide: React.FC<{ data: SlideData }> = () => null;
-export const ScrambleSlide: React.FC<{ data: SlideData }> = () => null;
-export const MissionLogSlide: React.FC<{ data: SlideData }> = () => null;
-export const GrammarBankSlide: React.FC<{ data: SlideData }> = () => null;
-export const ImperativesSlide: React.FC<{ data: SlideData }> = ({data}) => {
-    // Reusing the Drill layout mostly
-     return (
-        <div className="h-full flex flex-col items-center justify-center p-4 bg-slate-900 overflow-y-auto pb-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
-                {data.content.signs?.map((sign: ImperativeSign, i: number) => (
-                    <div key={i} className="bg-ocean-100 border border-ocean-300 p-6 flex flex-col items-center justify-center gap-4 hover:border-gold-500 group transition-all cursor-pointer h-40">
-                         <span className="text-4xl grayscale group-hover:grayscale-0">{sign.icon}</span>
-                         <span className="font-mono text-white text-sm bg-black px-2 py-1">{sign.rule}</span>
+export const ReadingChallengeSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [inputs, setInputs] = useState<Record<number, string>>({});
+    const [submitted, setSubmitted] = useState(false);
+    return (
+        <div className="h-full flex flex-col bg-slate-950 text-slate-100 overflow-y-auto custom-scrollbar">
+            <div className="w-full bg-slate-900 border-b border-white/10 p-6 sticky top-0 z-20 flex justify-between items-center shadow-2xl"><h2 className="text-3xl font-black font-mono text-red-600 uppercase tracking-widest animate-pulse">{data.title}</h2><div className="flex items-center gap-4"><button onClick={() => setSubmitted(true)} className="bg-red-700 text-white font-black font-mono py-3 px-8 rounded-xl shadow-lg hover:bg-red-600 transition-all uppercase tracking-widest border-2 border-red-500">DECODE INTEL</button></div></div>
+            <div className="max-w-6xl mx-auto w-full p-6 md:p-12 space-y-10 pb-32"><div className="bg-slate-900/50 p-10 md:p-16 rounded-3xl font-serif text-2xl md:text-3xl leading-[2] text-slate-200 shadow-2xl border border-white/5 backdrop-blur-xl relative"><div className="absolute top-0 right-10 -translate-y-1/2 bg-red-600 text-white px-6 py-2 rounded-full font-mono font-black text-xs uppercase tracking-[0.5em]">Classified Log</div><h3 className="text-sm font-mono text-blue-500 mb-8 uppercase tracking-[0.4em] border-b border-white/10 pb-4">PART 1: THE NAMIK EKIN CHRONICLES</h3>{data.content.parts[0].textSegments.map((seg: string, i: number) => <React.Fragment key={i}>{seg}{data.content.parts[0].gaps.find((g: any) => g.id === i + 1) && <span className="relative group inline-block mx-2"><input type="text" value={inputs[i+1] || ""} onChange={(e) => setInputs({...inputs, [i+1]: e.target.value})} className={`w-48 bg-slate-950 border-b-4 text-center py-1 outline-none font-mono text-2xl transition-all font-black ${submitted ? (inputs[i+1]?.toLowerCase().trim() === data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() ? 'text-green-500 border-green-500 bg-green-900/20' : 'text-red-500 border-red-600 bg-red-900/20') : 'border-white/20 focus:border-blue-500'}`} />{submitted && inputs[i+1]?.toLowerCase().trim() !== data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer.toLowerCase() && <span className="absolute -bottom-10 left-0 text-xs text-red-500 font-mono font-black uppercase bg-slate-950 px-3 py-1.5 rounded-xl border border-red-900 shadow-2xl z-20 whitespace-nowrap">{data.content.parts[0].gaps.find((g:any)=>g.id===i+1).answer}</span>}</span>}</React.Fragment>)}</div></div>
+        </div>
+    );
+};
+
+export const LegendDossierSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+    const [selections, setSelections] = useState<Record<number, string>>({});
+    const [results, setResults] = useState<Record<number, boolean>>({});
+
+    const handleSelect = (folderId: number, key: string, correct: string) => {
+        if (results[folderId] !== undefined) return;
+        setSelections(prev => ({ ...prev, [folderId]: key }));
+        setResults(prev => ({ ...prev, [folderId]: key === correct }));
+    };
+
+    return (
+        <div className="h-full w-full bg-[#0a0a0a] text-white p-6 overflow-y-auto custom-scrollbar">
+            <div className="max-w-7xl mx-auto space-y-10">
+                <div className="text-center">
+                    <h2 className="text-4xl md:text-6xl font-black font-mono text-amber-500 uppercase tracking-tighter">{data.title}</h2>
+                    <p className="text-slate-500 font-mono mt-2 uppercase tracking-widest">{data.content.instruction}</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-20">
+                    {data.content.folders.map((folder: any) => (
+                        <div key={folder.id} className={`p-8 rounded-[2rem] border-4 transition-all ${results[folder.id] === true ? 'bg-green-950/20 border-green-600 shadow-[0_0_30px_rgba(22,163,74,0.3)]' : results[folder.id] === false ? 'bg-red-950/20 border-red-600' : 'bg-slate-900 border-slate-800'}`}>
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="font-mono text-xs font-black text-slate-500 tracking-[0.3em] uppercase">{folder.label}</span>
+                                {results[folder.id] === true && <span className="text-green-500 font-black font-mono text-xs animate-pulse">✓ VERIFIED</span>}
+                                {results[folder.id] === false && <span className="text-red-500 font-black font-mono text-xs">⚠ ACCESS DENIED</span>}
+                            </div>
+                            <p className="text-xl md:text-2xl font-serif leading-relaxed mb-8 italic">
+                                {folder.text.split('______').map((part: string, i: number) => (
+                                    <React.Fragment key={i}>
+                                        {part}
+                                        {i === 0 && <span className={`underline decoration-wavy px-2 font-black ${results[folder.id] === true ? 'text-green-400' : results[folder.id] === false ? 'text-red-500' : 'text-amber-500'}`}>{selections[folder.id] || "______"}</span>}
+                                    </React.Fragment>
+                                ))}
+                            </p>
+                            <div className="grid grid-cols-3 gap-3">
+                                {folder.keys.map((key: string) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => handleSelect(folder.id, key, folder.correct)}
+                                        disabled={results[folder.id] !== undefined}
+                                        className={`py-3 rounded-xl font-mono font-black text-sm transition-all ${
+                                            selections[folder.id] === key 
+                                            ? (results[folder.id] ? 'bg-green-600' : 'bg-red-600') 
+                                            : 'bg-slate-800 hover:bg-slate-700 active:scale-95'
+                                        }`}
+                                    >
+                                        {key}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Stunning Final Recap Slide (Affilli Style) ---
+export const DebriefSlide: React.FC<{ data: SlideData }> = ({ data }) => {
+  return (
+    <div className="h-full w-full bg-slate-950 flex flex-col items-center justify-center p-6 text-white overflow-y-auto custom-scrollbar relative">
+        {/* Background Decorative Elements */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full blur-[150px] animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-600 rounded-full blur-[150px] animate-pulse delay-1000"></div>
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+        </div>
+
+        <div className="max-w-6xl w-full relative z-10 flex flex-col gap-10 py-12">
+            {/* Header Section */}
+            <div className="text-center animate-in slide-in-from-top-12 duration-1000">
+                <div className="inline-block border-4 border-green-500 px-8 py-3 rounded-full mb-8 shadow-[0_0_30px_rgba(34,197,94,0.4)] bg-slate-900/80 backdrop-blur">
+                    <span className="text-green-400 font-mono font-black text-xl md:text-2xl uppercase tracking-[0.5em] animate-pulse">Unit Complete</span>
+                </div>
+                <h2 className="text-6xl md:text-9xl font-black font-mono uppercase tracking-tighter text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] leading-none">{data.title}</h2>
+                <div className="h-1.5 w-64 bg-amber-500 mx-auto mt-6 rounded-full shadow-[0_0_20px_rgba(245,158,11,1)]"></div>
+                <p className="text-slate-400 font-mono mt-4 uppercase tracking-[0.4em] text-lg md:text-xl font-bold italic">{data.subtitle}</p>
+            </div>
+
+            {/* Recap Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in zoom-in duration-1000 delay-300">
+                {data.content.recapItems.map((item: any, idx: number) => (
+                    <div key={idx} className="bg-slate-900/60 backdrop-blur-xl p-8 rounded-[2.5rem] border-2 border-slate-800 hover:border-blue-600 transition-all group shadow-2xl">
+                        <div className="flex items-center gap-5 mb-6">
+                            <div className="w-14 h-14 bg-blue-600/20 border-2 border-blue-500 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">⚓</div>
+                            <h3 className="text-2xl font-black font-mono text-blue-400 group-hover:text-white uppercase tracking-tighter">{item.label}</h3>
+                        </div>
+                        <p className="text-slate-300 font-serif text-lg md:text-2xl leading-relaxed italic border-l-4 border-slate-800 pl-6 group-hover:border-blue-500 transition-colors">
+                            {item.summary}
+                        </p>
                     </div>
                 ))}
             </div>
+
+            {/* Final Closing Message */}
+            <div className="bg-gradient-to-r from-blue-900/40 to-slate-900/40 p-12 rounded-[3rem] border-4 border-slate-800 text-center animate-in slide-in-from-bottom-12 duration-1000 delay-700 shadow-[0_-20px_60px_rgba(0,0,0,0.5)]">
+                <p className="text-2xl md:text-4xl font-serif text-white mb-10 leading-relaxed max-w-4xl mx-auto italic font-bold">
+                    "{data.content.closingMessage}"
+                </p>
+                <div className="flex flex-col md:flex-row items-center justify-center gap-10 border-t border-white/10 pt-10">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">Status</span>
+                        <span className="text-green-500 font-mono font-black text-2xl uppercase tracking-widest">A2 Level Secured</span>
+                    </div>
+                    <div className="w-px h-12 bg-white/10 hidden md:block"></div>
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1">Rank</span>
+                        <span className="text-amber-500 font-mono font-black text-2xl uppercase tracking-widest">Petty Officer (1st Class)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="text-center mt-6">
+                <p className="text-slate-600 font-mono text-xs uppercase tracking-[1em] font-black opacity-40 animate-pulse">End of Signal // Mission Log Saved</p>
+            </div>
         </div>
-     )
+    </div>
+  );
 };
+
+// --- STUBS ---
+export const ChecklistSlide: React.FC<{ data: SlideData }> = () => null;
+export const MediaSlide: React.FC<{ data: SlideData }> = () => null;
+export const ComprehensionTFSlide: React.FC<{ data: SlideData }> = () => null;
+export const SpeakingSlide: React.FC<{ data: SlideData }> = () => null;
+export const QASlide: React.FC<{ data: SlideData }> = () => null;
+export const MissionLogSlide: React.FC<{ data: SlideData }> = () => null;
+export const GrammarBankSlide: React.FC<{ data: SlideData }> = () => null;
+export const ImperativesSlide: React.FC<{ data: SlideData }> = () => null;
+export const ComprehensionMCSlide: React.FC<{ data: SlideData }> = () => null;
+export const GrammarSlide: React.FC<{ data: SlideData }> = () => null;
+export const DrillSlide: React.FC<{ data: SlideData }> = () => null;
+export const MatchingSlide: React.FC<{ data: SlideData }> = () => null;
+export const RadarScanSlide: React.FC<{ data: SlideData }> = () => null;

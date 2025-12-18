@@ -11,21 +11,20 @@
         theme: {
           extend: {
             colors: {
-              // THEME OVERHAUL: "Tactical Navy"
-              // We map 'ocean' to dark slate/navy tones for the base UI
+              // THEME OVERHAUL: "Light Navy" (Better Readability)
               ocean: {
-                50: '#0f172a',  // Very Dark Blue (Background)
-                100: '#1e293b', // Dark Blue-Grey (Cards)
-                200: '#334155', // Borders
-                300: '#475569', // Text Muted
-                400: '#64748b', // Text Secondary
-                500: '#3b82f6', // Primary Action (Blue)
-                600: '#2563eb', // Hover Action
-                700: '#1d4ed8', // Active
-                800: '#0f172a', // Darkest
-                900: '#020617', // Black-ish
+                50: '#f8fafc',  // Very Light Grey (Background)
+                100: '#f1f5f9', // Card Background
+                200: '#e2e8f0', // Borders
+                300: '#cbd5e1', // Dividers
+                400: '#94a3b8', // Muted Text
+                500: '#3b82f6', // Primary Action
+                600: '#2563eb', // Hover
+                700: '#1e40af', // Navy Blue (Primary Text)
+                800: '#1e3a8a', // Dark Navy headers
+                900: '#0f172a', // Black-ish
               },
-              // Gold for ranks and achievements
+              // Gold for ranks
               gold: {
                 100: '#fef9c3',
                 200: '#fde047',
@@ -33,17 +32,12 @@
                 400: '#eab308',
                 500: '#ca8a04',
                 600: '#a16207',
-              },
-              // Danger/Alert red
-              alert: {
-                500: '#ef4444',
-                900: '#7f1d1d'
               }
             },
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
               serif: ['Merriweather', 'serif'],
-              mono: ['JetBrains Mono', 'monospace'], // Added for "Terminal" feel
+              mono: ['JetBrains Mono', 'monospace'],
             }
           }
         }
@@ -53,8 +47,8 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #020617; /* Hard dark mode bg */
-        color: #e2e8f0; /* Light text default */
+        background-color: #f8fafc; /* Light mode bg */
+        color: #1e3a8a; /* Navy text default */
       }
       .serif {
         font-family: 'Merriweather', serif;
@@ -62,35 +56,16 @@
       .mono {
         font-family: 'JetBrains Mono', monospace;
       }
-      /* Custom scrollbar for Dark Mode */
+      /* Custom scrollbar */
       .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
       }
       .custom-scrollbar::-webkit-scrollbar-track {
-        background: #0f172a;
+        background: #f1f5f9;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #3b82f6; 
+        background: #cbd5e1; 
         border-radius: 3px;
-      }
-      
-      /* CRT Screen Effect Animation */
-      @keyframes scanline {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100%); }
-      }
-      .scanline::before {
-        content: " ";
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-        z-index: 2;
-        background-size: 100% 2px, 3px 100%;
-        pointer-events: none;
       }
     </style>
   <script type="importmap">
@@ -104,7 +79,7 @@
 }
 </script>
 </head>
-  <body class="bg-slate-950 text-slate-100 antialiased overflow-hidden h-[100dvh]">
+  <body class="bg-slate-50 text-slate-900 antialiased overflow-hidden h-[100dvh]">
     <div id="root" class="h-full"></div>
     <script type="module" src="./index.tsx"></script>
   </body>
