@@ -6,6 +6,7 @@ import imgDecision from './media/reading1.jpg';
 import imgArrival from './media/reading2.jpg';
 import imgTraining from './media/reading3.jpg';
 import imgOath from './media/reading4.jpg';
+// Eğer video dosyan yoksa veya adı farklıysa burayı düzelt:
 import videoGemiler from './media/gemiler.mp4'; 
 
 export const LESSON_TITLE = "UNIT 5: FROM CANDIDATE TO SAILOR";
@@ -92,4 +93,35 @@ export const SLIDES: SlideData[] = [
       { word: "strong (adj.)", definition: "having great physical power or ability" },
       { word: "recruit (n.)", definition: "a person who has just joined the armed forces" }
     ], 
-    text: TEXT_SCENE
+    text: TEXT_SCENE_3 
+  } },
+  { id: 5, type: SlideType.READING, title: "PHASE 4: THE UNIFORM & OATH", subtitle: "A Funny Memory", content: { 
+    backgroundImage: imgOath, 
+    phase: 4, 
+    totalPhases: 4, 
+    vocabulary: [
+      { word: "uniform (n.)", definition: "special set of clothes worn by all members of a group" }, 
+      { word: "swap (v.)", definition: "to give something to someone and get something else back" }, 
+      { word: "fix (v.)", definition: "to repair something or solve a problem" }, 
+      { word: "oath (n.)", definition: "a formal and very serious promise" },
+      { word: "become (v.)", definition: "to begin to be something" },
+      { word: "perfect (adj.)", definition: "completely good; without any mistakes" }
+    ], 
+    text: TEXT_SCENE_4 
+  } },
+  { id: 6, type: SlideType.SCRAMBLE, title: "LOGBOOK DATA CORRUPTION", subtitle: "OPERATION: CHRONOS", content: { instruction: "Commander! Mustafa's logbook fell apart. Re-order the segments to restore the timeline.", items: [{ id: 1, parts: ["Mustafa decided", "to join", "the Navy."], correctSentence: "1" }, { id: 2, parts: ["He passed", "the MSÜ exams", "successfully."], correctSentence: "2" }, { id: 3, parts: ["He completed", "the sports", "interview."], correctSentence: "3" }, { id: 4, parts: ["He travelled", "to Yalova", "School."], correctSentence: "4" }, { id: 5, parts: ["He entered", "the campus", "gate."], correctSentence: "5" }, { id: 6, parts: ["He cleaned", "dorms during", "training."], correctSentence: "6" }, { id: 7, parts: ["He swapped", "the wrong", "uniform (XL)."], correctSentence: "7" }, { id: 8, parts: ["Finally,", "he took", "the oath."], correctSentence: "8" }] } },
+  { id: 7, type: SlideType.GRAMMAR_ANALYSIS, title: "MISSION ANALYSIS", subtitle: "ACTION PATTERNS (REGULAR)", content: { cards: [{ title: "General Rule", suffixDisplay: "+ed", rule: "For most verbs, simply add -ed to the end.", contextSentence: "Mustafa **wanted** to join the Navy.", examples: [{ base: "want", suffix: "ed" }, { base: "clean", suffix: "ed" }] }, { title: "Ends in 'e'", suffixDisplay: "+d", rule: "If the verb ends in 'e', just add -d.", contextSentence: "He **arrived** at the school gate.", examples: [{ base: "arrive", suffix: "d" }, { base: "decide", suffix: "d" }] }, { title: "Ends in 'y'", suffixDisplay: "-y +ied", rule: "Consonant + y? Change 'y' to 'i' and add -ed.", contextSentence: "He **studied** hard for the exams.", examples: [{ base: "study", suffix: "ied" }, { base: "try", suffix: "ied" }] }, { title: "Double Consonant", suffixDisplay: "Double", rule: "Short verbs (CVC)? Double the last letter.", contextSentence: "He **travelled** to Yalova.", examples: [{ base: "travel", suffix: "led" }, { base: "stop", suffix: "ped" }] }] } },
+  { id: 8, type: SlideType.VERB_CHALLENGE, title: "TARGET ACQUISITION", subtitle: "OFFICIAL ACTION LOG", content: { verbs: [{ base: "STUDY", past: "STUDIED", type: "regular" }, { base: "ARRIVE", past: "ARRIVED", type: "regular" }, { base: "CLEAN", past: "CLEANED", type: "regular" }, { base: "LISTEN", past: "LISTENED", type: "regular" }, { base: "WORK", past: "WORKED", type: "regular" }, { base: "SWAP", past: "SWAPPED", type: "regular" }, { base: "FIX", past: "FIXED", type: "regular" }, { base: "LOOK", past: "LOOKED", type: "regular" }, { base: "STAY", past: "STAYED", type: "regular" }, { base: "START", past: "STARTED", type: "regular" }, { base: "WALK", past: "WALKED", type: "regular" }, { base: "WATCH", past: "WATCHED", type: "regular" }, { base: "PLAY", past: "PLAYED", type: "regular" }, { base: "PASS", past: "PASSED", type: "regular" }, { base: "EXERCISE", past: "EXERCISED", type: "regular" }] } },
+  { id: 9, type: SlideType.DAILY_REPORT, title: "THE DAILY REPORT", subtitle: "CADET'S LOG ENTRY", content: { instruction: "Fill in the gaps with the Past Simple form.", segments: [{ type: 'text', value: "Yesterday was a busy day.\n\nIn the morning, we " }, { type: 'gap', id: 1, hint: "clean", answer: "cleaned" }, { type: 'text', value: " our dorms. Then, the commander " }, { type: 'gap', id: 2, hint: "talk", answer: "talked" }, { type: 'text', value: " to us. We " }, { type: 'gap', id: 3, hint: "listen", answer: "listened" }, { type: 'text', value: " carefully. After lunch, I " }, { type: 'gap', id: 4, hint: "exercise", answer: "exercised" }, { type: 'text', value: " at the sports field. In the evening, I " }, { type: 'gap', id: 5, hint: "call", answer: "called" }, { type: 'text', value: " my family. Finally, I " }, { type: 'gap', id: 6, hint: "watch", answer: "watched" }, { type: 'text', value: " a video." }] } },
+  { id: 10, type: SlideType.READING_CHALLENGE, title: "THE LEGENDARY SAT: NAMIK EKİN", subtitle: "OPERATION: IRON MAN", content: { 
+    profileImage: "https://im.haberturk.com/2016/10/28/ver1477647225/1316493_620x410.jpg", 
+    profileName: "NAMIK EKİN", 
+    profileRank: "SAT COMMANDO (Rtd)", 
+    parts: [{ 
+      type: 'gap_fill', 
+      title: "PART 1: THE STORY", 
+      textSegments: [
+        "Namık Ekin ", " (be) born in Istanbul. During his childhood, he ", " (love) sports. When he was a teenager, he ", " (enter) the naval petty officer vocational school. He ", " (be) a very clever and positive student. He ", " (not / stay) idle; he ", " (exercise) all day. He ", " (win) many championships in gymnastics and weightlifting. After he ", " (finish) the school, he ", " (decide) to become a SAT commando.\n\nIn 1963, the SAT training ", " (start). It ", " (be) very hard and serious. Namık ", " (work) like a marathon runner. He ", " (walk) long distances with heavy bags and ", " (swim) for hours in cold water. He ", " (not / stop) when he was tired. He ", " (wait) for the orders and ", " (listen) to his commanders carefully. Finally, he ", " (complete) the course and ", " (become) the top student (kurs birincisi). He ", " (be) officially a SAT commando.\n\nHis military career ", " (be) very busy. In 1968, he ", " (join) the NATO 'Preveze' exercise. He ", " (be) very famous there because he ", " (take) the high-ranking NATO commanders as prisoners alone! Everyone ", " (laugh) in surprise, but it ", " (be) a great success. He ", " (travel) to many countries and ", " (learn) different tactics. He ", " (not / eat) unhealthy things like frozen desserts. He ", " (have) a special recipe for his energy and always ", " (stay) strong.\n\nAfter the Navy, Namık Ekin ", " (start) to try world records. He ", " (stay) underwater for 24 hours! He ", " (write) many books about his life and ", " (give) seminars to young recruits. Today, many college students ", " (follow) his YouTube channel and ", " (watch) his videos. He ", " (be) a hero for all sailors. He ", " (live) a legendary life because he ", " (believe) in himself and ", " hard all his life."
+      ], 
+      gaps: [
+        { id: 1, verb: "be", answer: "was" }, { id: 2, verb: "love", answer: "loved" }, { id: 3, verb: "enter", answer: "entered" }, { id: 4, verb: "be", answer: "was" }, { id: 5, verb: "not / stay", answer: "didn't stay" }, { id: 6, verb: "exercise", answer: "exercised" }, { id: 7, verb: "win", answer: "won" }, { id: 8, verb: "finish", answer: "finished" }, { id: 9, verb: "decide", answer: "decided" }, { id: 10, verb:
